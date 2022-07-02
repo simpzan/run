@@ -3,8 +3,8 @@ run and Runfile
 
 # install
 ```bash
-curl https://raw.githubusercontent.com/simpzan/run/main/Runfile.rc -o Runfile.install && \
-    bash Runfile.install && rm -rf Runfile.install
+curl https://raw.githubusercontent.com/simpzan/run/main/Runfile.rc -o tmp && \
+    bash tmp && rm -rf tmp
 ```
 
 # use
