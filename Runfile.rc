@@ -41,6 +41,7 @@ EOF
 }
 
 .bash_completion.complete() {
+  if [ ! -f ./Runfile ]; then return; fi
   local prefix=${COMP_WORDS[$COMP_CWORD]}
   local function_names=`./Runfile`
   local result=`compgen -W "$function_names" "$prefix"`
