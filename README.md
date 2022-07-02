@@ -1,5 +1,8 @@
-run and Runfile
+`run` command and `Runfile`
 ====
+
+`run` command and `Runfile` is similar to `make` command and `Makefile`, but for shell tasks.
+`run` command supports bash completion.
 
 # install
 ```bash
