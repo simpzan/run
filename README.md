@@ -2,7 +2,13 @@
 ====
 
 `run` command and `Runfile` is similar to `make` command and `Makefile`, but for shell tasks.
-`run` command supports bash completion.
+
+# features
+- implemented in simple bash, no dependencies;
+- supports bash and zsh;
+- supports command completion with TAB key;
+- list task names;
+- generate sample `Runfile`;
 
 # install
 ```bash
