@@ -2,8 +2,7 @@
 
 run() {
   if [ -z $1 ]; then
-    if [ -f ./Runfile ]; then .run.tasks;
-    else .run.init; fi
+    [ -f ./Runfile ] && .run.tasks || .run.init
   else
     TIMEFORMAT="Task '$1' completed in %3lR"
     time ./Runfile "$@"
