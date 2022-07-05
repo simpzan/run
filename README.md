@@ -6,8 +6,7 @@
 
 # install
 ```bash
-curl https://raw.githubusercontent.com/simpzan/run/main/Runfile.rc -o tmp && \
-    bash tmp && rm -rf tmp
+curl https://raw.githubusercontent.com/simpzan/run/main/Runfile.rc -o `mktemp` && bash $_
 ```
 
 # use
