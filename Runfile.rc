@@ -16,7 +16,7 @@ run() {
 }
 .run.init.gen() { cat > $1 << 'EOF'
 #!/bin/bash
-hello() { echo "Hello from $0"; }
+help() { echo "run, the minimalist's task runner - https://github.com/simpzan/run"; }
 .tasks() { compgen -A function | grep -v "^\."; }
 ${@:-.tasks}
 EOF

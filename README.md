@@ -27,8 +27,8 @@ Or just run `./Runfile`.
 When cursor is at the end of `run `, press Tab button will auto complete task names
 
 ## run a task
-run `run hello` to run the `hello` task in `Runfile`.
-Or just run `./Runfile hello`.
+run `run help` to run the `help` task in `Runfile`.
+Or just run `./Runfile help`.
 
 # Runfile
 see [Runfile](Runfile) for an example.
