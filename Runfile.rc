@@ -31,7 +31,7 @@ EOF
 .run.install.rc() {
   local rc=$1
   local cmd='[ -f ~/.Runfile.rc ] && source ~/.Runfile.rc'
-  grep -E "$cmd" $rc > /dev/null || echo "$cmd" >> $rc
+  grep -E "$cmd" $rc >/dev/null 2>&1 || echo "$cmd" >> $rc
 }
 .run.install() {
   local selfPath=$0
