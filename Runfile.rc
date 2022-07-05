@@ -3,6 +3,8 @@
 run() {
   if [ -z $1 ]; then
     [ -f ./Runfile ] && .run.tasks || .run.init
+  elif [ "$1" = "-h" ]; then
+    echo "run, the minimalist's task runner - https://github.com/simpzan/run";
   else
     TIMEFORMAT="Task '$1' completed in %3lR"
     time ./Runfile "$@"
