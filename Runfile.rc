@@ -18,9 +18,9 @@ EOF
   ./Runfile | cat -n
 }
 run() {
-  if [ -z $1 ]; then
+  if test -z $1; then
     if test -f ./Runfile; then .run.tasks; else .run.init; fi
-  elif [ "$1" = "-h" ]; then
+  elif test "$1" = "-h"; then
     echo "run, the minimalist's task runner - https://github.com/simpzan/run"
   else
     TIMEFORMAT="Task '$1' completed in %3lR"
@@ -51,4 +51,4 @@ run() {
   .run.install.rc ~/.zshrc
   echo "run command installed, restart shell session to use it."
 }
-if [ "$0" = "$BASH_SOURCE" ]; then .run.install; else .run.completion.install; fi
+if test "$0" = "$BASH_SOURCE"; then .run.install; else .run.completion.install; fi
