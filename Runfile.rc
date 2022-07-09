@@ -21,23 +21,23 @@ run() {
   if [ -z $1 ]; then
     if test -f ./Runfile; then .run.tasks; else .run.init; fi
   elif [ "$1" = "-h" ]; then
-    echo "run, the minimalist's task runner - https://github.com/simpzan/run";
+    echo "run, the minimalist's task runner - https://github.com/simpzan/run"
   else
     TIMEFORMAT="Task '$1' completed in %3lR"
     time ./Runfile "$@"
   fi
 }
 
-.bash_completion.complete() {
+.run.completion.complete() {
   test ! -f ./Runfile && return
   local prefix=${COMP_WORDS[$COMP_CWORD]}
   local function_names=`./Runfile`
   local result=`compgen -W "$function_names" "$prefix"`
   COMPREPLY=($result)
 }
-.bash_completion.install() {
+.run.completion.install() {
   test ! -z ${ZSH_VERSION+x} && autoload -U +X bashcompinit && bashcompinit
-  complete -F .bash_completion.complete run Runfile
+  complete -F .run.completion.complete run Runfile
 }
 .run.install.rc() {
   local rc=$1
@@ -51,8 +51,4 @@ run() {
   .run.install.rc ~/.zshrc
   echo "run command installed, restart shell session to use it."
 }
-if [ "$0" = "$BASH_SOURCE" ]; then  # echo "run"
-  .run.install
-else  # echo "source"
-  .bash_completion.install
-fi
+if [ "$0" = "$BASH_SOURCE" ]; then .run.install; else .run.completion.install; fi
