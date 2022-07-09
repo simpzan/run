@@ -1,19 +1,5 @@
 #!/bin/bash
 
-run() {
-  if [ -z $1 ]; then
-    if test -f ./Runfile; then .run.tasks; else .run.init; fi
-  elif [ "$1" = "-h" ]; then
-    echo "run, the minimalist's task runner - https://github.com/simpzan/run";
-  else
-    TIMEFORMAT="Task '$1' completed in %3lR"
-    time ./Runfile "$@"
-  fi
-}
-.run.tasks() {
-  echo "Tasks in Runfile:"
-  ./Runfile | cat -n
-}
 .run.init.gen() { cat > $1 << 'EOF'
 #!/bin/bash
 help() { echo "run, the minimalist's task runner - https://github.com/simpzan/run"; }
@@ -27,17 +13,19 @@ EOF
   .run.init.gen ./Runfile && chmod a+x $_
   echo "created Runfile."
 }
-.run.install.rc() {
-  local rc=$1
-  local cmd='test -f ~/.Runfile.rc && source $_'
-  grep -E "$cmd" $rc >/dev/null 2>&1 || echo "$cmd" >> $rc
+.run.tasks() {
+  echo "Tasks in Runfile:"
+  ./Runfile | cat -n
 }
-.run.install() {
-  local selfPath=$0
-  cp $selfPath ~/.Runfile.rc
-  .run.install.rc ~/.bashrc
-  .run.install.rc ~/.zshrc
-  echo "run command installed, restart shell session to use it."
+run() {
+  if [ -z $1 ]; then
+    if test -f ./Runfile; then .run.tasks; else .run.init; fi
+  elif [ "$1" = "-h" ]; then
+    echo "run, the minimalist's task runner - https://github.com/simpzan/run";
+  else
+    TIMEFORMAT="Task '$1' completed in %3lR"
+    time ./Runfile "$@"
+  fi
 }
 
 .bash_completion.complete() {
@@ -51,7 +39,18 @@ EOF
   test ! -z ${ZSH_VERSION+x} && autoload -U +X bashcompinit && bashcompinit
   complete -F .bash_completion.complete run Runfile
 }
-
+.run.install.rc() {
+  local rc=$1
+  local cmd='test -f ~/.Runfile.rc && source $_'
+  grep -E "$cmd" $rc >/dev/null 2>&1 || echo "$cmd" >> $rc
+}
+.run.install() {
+  local selfPath=$0
+  cp $selfPath ~/.Runfile.rc
+  .run.install.rc ~/.bashrc
+  .run.install.rc ~/.zshrc
+  echo "run command installed, restart shell session to use it."
+}
 if [ "$0" = "$BASH_SOURCE" ]; then  # echo "run"
   .run.install
 else  # echo "source"
