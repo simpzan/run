@@ -2,7 +2,7 @@
 
 run() {
   if [ -z $1 ]; then
-    [ -f ./Runfile ] && .run.tasks || .run.init
+    if test -f ./Runfile; then .run.tasks; else .run.init; fi
   elif [ "$1" = "-h" ]; then
     echo "run, the minimalist's task runner - https://github.com/simpzan/run";
   else
@@ -23,7 +23,7 @@ EOF
 }
 .run.init() {
   printf 'create Runfile? (Y/n)'; read answer
-  if [ "$answer" = "n" ]; then return; fi
+  test "$answer" = "n" && return
   .run.init.gen ./Runfile
   chmod a+x ./Runfile
   echo "created Runfile."
@@ -42,19 +42,16 @@ EOF
 }
 
 .bash_completion.complete() {
-  if [ ! -f ./Runfile ]; then return; fi
+  test ! -f ./Runfile && return
   local prefix=${COMP_WORDS[$COMP_CWORD]}
   local function_names=`./Runfile`
   local result=`compgen -W "$function_names" "$prefix"`
   COMPREPLY=($result)
 }
 .bash_completion.install() {
-  if [ ! -z ${ZSH_VERSION+x} ]; then
-    autoload -U +X bashcompinit && bashcompinit
-  fi
+  test ! -z ${ZSH_VERSION+x} && autoload -U +X bashcompinit && bashcompinit
   complete -F .bash_completion.complete run Runfile
 }
-
 
 if [ "$0" = "$BASH_SOURCE" ]; then  # echo "run"
   .run.install
