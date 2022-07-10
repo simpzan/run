@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 git.config() {
   git config --global alias.co checkout
   git config --global alias.br branch
