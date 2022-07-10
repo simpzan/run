@@ -42,7 +42,7 @@ run() {
 .run.install.rc() {
   local rc=$1
   local cmd='test -f ~/.Runfile.rc && source $_'
-  grep -E "$cmd" $rc >/dev/null 2>&1 || echo "$cmd" >> $rc
+  grep -q "$cmd" $rc || echo "$cmd" >> $rc
 }
 .run.install() {
   local selfPath=$0
