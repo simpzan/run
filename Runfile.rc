@@ -31,8 +31,7 @@ run() {
 .run.completion.complete() {
   test ! -f ./Runfile && return
   local prefix=${COMP_WORDS[$COMP_CWORD]}
-  local function_names=`./Runfile`
-  local result=`compgen -W "$function_names" "$prefix"`
+  local result=$(compgen -W "$(./Runfile)" "$prefix")
   COMPREPLY=($result)
 }
 .run.completion.install() {
