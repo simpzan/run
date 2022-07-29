@@ -36,7 +36,10 @@ run() {
   COMPREPLY=($result)
 }
 .run.completion.install() {
-  test -n "${ZSH_VERSION+x}" && autoload -U +X bashcompinit && bashcompinit
+  if test -n "${ZSH_VERSION+x}"; then
+    ! which compinit >/dev/null && autoload -Uz compinit && compinit
+    ! which bashcompinit >/dev/null && autoload -Uz bashcompinit && bashcompinit
+  fi
   complete -F .run.completion.complete run Runfile
 }
 .run.install.rc() {
