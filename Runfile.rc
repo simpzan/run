@@ -42,16 +42,16 @@ run() {
   fi
   complete -F .run.completion.complete run Runfile
 }
-.run.install.rc() {
-  local rc=$1
-  local cmd='test -f ~/.Runfile.rc && source $_'
+.util.file.append_if() {
+  local rc=$1 cmd=$2
   grep -q "$cmd" $rc 2>/dev/null || echo "$cmd" >> $rc
 }
 .run.install() {
   local selfPath=$0
   cp $selfPath ~/.Runfile.rc
-  .run.install.rc ~/.bashrc
-  .run.install.rc ~/.zshrc
+  local cmd='test -f ~/.Runfile.rc && source $_'
+  .util.file.append_if ~/.bashrc "$cmd"
+  .util.file.append_if ~/.zshrc "$cmd"
   echo "run command installed, restart shell session to use it."
 }
 if test "$0" = "$BASH_SOURCE"; then .run.install; else .run.completion.install; fi
