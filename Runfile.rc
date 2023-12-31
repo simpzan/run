@@ -1,6 +1,6 @@
 #!/bin/bash
 
-.run.init.gen() { cat > $1 << 'EOF'
+_run_init_gen() { cat > $1 << 'EOF'
 #!/bin/bash
 set -euo pipefail
 help() { echo "run, the minimalist's task runner - https://github.com/simpzan/run"; }
@@ -17,19 +17,19 @@ main_() {
 main_ $@
 EOF
 }
-.run.init() {
+_run_init() {
   printf 'create Runfile? (Y/n)'; read answer
   [[ "$answer" == "n" ]] && return
-  .run.init.gen ./Runfile && chmod a+x $_
+  _run_init_gen ./Runfile && chmod a+x $_
   echo "created Runfile."
 }
-.run.tasks() {
+_run_tasks() {
   echo "Tasks in Runfile:"
   ./Runfile | cat -n
 }
 run() {
   if [[ -z "$@" ]]; then
-    if [[ -f ./Runfile ]]; then .run.tasks; else .run.init; fi
+    if [[ -f ./Runfile ]]; then _run_tasks; else _run_init; fi
   elif [[ "$1" == "-h" ]]; then
     echo "run, the minimalist's task runner - https://github.com/simpzan/run"
   else
@@ -38,30 +38,30 @@ run() {
   fi
 }
 
-.run.completion.complete() {
+_run_completion_complete() {
   [[ ! -f ./Runfile ]] && return
   local prefix=${COMP_WORDS[$COMP_CWORD]}
   local result=$(compgen -W "$(./Runfile)" "$prefix")
   COMPREPLY=($result)
 }
-.run.completion.install() {
+_run_completion_install() {
   if [[ -n "${ZSH_VERSION+x}" ]]; then
     ! which compinit >/dev/null && autoload -Uz compinit && compinit
     ! which bashcompinit >/dev/null && autoload -Uz bashcompinit && bashcompinit
   fi
-  complete -F .run.completion.complete run Runfile
+  complete -F _run_completion_complete run Runfile
 }
-.util.file.append_if() {
+_run_file_append_if() {
   local rc=$1 cmd=$2
   grep -q "$cmd" $rc 2>/dev/null || echo "$cmd" >> $rc
 }
-.run.install() {
+_run_install() {
   local selfPath=$0
   local file=.Runfile.rc
   cp $selfPath ~/$file
   local cmd="[[ -f ~/$file ]] && source ~/$file"
-  .util.file.append_if ~/.bashrc "$cmd"
-  .util.file.append_if ~/.zshrc "$cmd"
+  _run_file_append_if ~/.bashrc "$cmd"
+  _run_file_append_if ~/.zshrc "$cmd"
   echo "run command installed, restart shell session to use it."
 }
-if [[ "$0" == "$BASH_SOURCE" ]]; then .run.install; else .run.completion.install; fi
+if [[ "$0" == "$BASH_SOURCE" ]]; then _run_install; else _run_completion_install; fi
