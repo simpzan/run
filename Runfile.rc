@@ -19,7 +19,7 @@ EOF
 }
 .run.init() {
   printf 'create Runfile? (Y/n)'; read answer
-  test "$answer" = "n" && return
+  [[ "$answer" == "n" ]] && return
   .run.init.gen ./Runfile && chmod a+x $_
   echo "created Runfile."
 }
@@ -28,9 +28,9 @@ EOF
   ./Runfile | cat -n
 }
 run() {
-  if test -z $1; then
-    if test -f ./Runfile; then .run.tasks; else .run.init; fi
-  elif test "$1" = "-h"; then
+  if [[ -z "$@" ]]; then
+    if [[ -f ./Runfile ]]; then .run.tasks; else .run.init; fi
+  elif [[ "$1" == "-h" ]]; then
     echo "run, the minimalist's task runner - https://github.com/simpzan/run"
   else
     TIMEFORMAT="Task '$1' completed in %3lR"
@@ -39,13 +39,13 @@ run() {
 }
 
 .run.completion.complete() {
-  test ! -f ./Runfile && return
+  [[ ! -f ./Runfile ]] && return
   local prefix=${COMP_WORDS[$COMP_CWORD]}
   local result=$(compgen -W "$(./Runfile)" "$prefix")
   COMPREPLY=($result)
 }
 .run.completion.install() {
-  if test -n "${ZSH_VERSION+x}"; then
+  if [[ -n "${ZSH_VERSION+x}" ]]; then
     ! which compinit >/dev/null && autoload -Uz compinit && compinit
     ! which bashcompinit >/dev/null && autoload -Uz bashcompinit && bashcompinit
   fi
@@ -57,10 +57,11 @@ run() {
 }
 .run.install() {
   local selfPath=$0
-  cp $selfPath ~/.Runfile.rc
-  local cmd='test -f ~/.Runfile.rc && source $_'
+  local file=.Runfile.rc
+  cp $selfPath ~/$file
+  local cmd="[[ -f ~/$file ]] && source ~/$file"
   .util.file.append_if ~/.bashrc "$cmd"
   .util.file.append_if ~/.zshrc "$cmd"
   echo "run command installed, restart shell session to use it."
 }
-if test "$0" = "$BASH_SOURCE"; then .run.install; else .run.completion.install; fi
+if [[ "$0" == "$BASH_SOURCE" ]]; then .run.install; else .run.completion.install; fi
