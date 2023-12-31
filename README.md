@@ -12,7 +12,7 @@
 
 # install
 ```bash
-curl https://raw.githubusercontent.com/simpzan/run/main/Runfile.rc -o `mktemp` && bash $_
+curl https://raw.githubusercontent.com/simpzan/run/main/run.rc -o `mktemp` && bash $_
 ```
 
 # use
