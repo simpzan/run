@@ -4,8 +4,17 @@
 #!/bin/bash
 set -euo pipefail
 help() { echo "run, the minimalist's task runner - https://github.com/simpzan/run"; }
-.tasks() { compgen -A function | grep -v "^\."; }
-${@:-.tasks}
+
+main_() {
+  if [[ -z "$@" ]]; then
+    compgen -A function | grep -v "_$"
+  elif declare -F "$1" >/dev/null; then
+    "$@"
+  else
+    echo "Error: unknown function '$1'" >&2
+  fi
+}
+main_ $@
 EOF
 }
 .run.init() {
