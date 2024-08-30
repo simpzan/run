@@ -86,7 +86,7 @@ def install():
     cmd = f'''
 TARGET_FILE=/usr/local/bin/run
 sudo cp {current_file_path} $TARGET_FILE
-sudo chmod a+x $TARGET_FILE
+sudo chmod 755 $TARGET_FILE
 ls -alh $TARGET_FILE
 '''
     subprocess.run(cmd, shell=True)
