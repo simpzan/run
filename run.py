@@ -3,6 +3,16 @@ import sys
 import os
 import subprocess
 
+def run(cmds, wait=5, pipe=False):
+    stdout = subprocess.PIPE if pipe else None
+    process = subprocess.Popen(cmds, shell=True, text=True, stdout=stdout, stderr=stdout)
+    if wait <= 0: return process
+    out, err = process.communicate(timeout=wait)
+    if pipe:
+        process.stdout = out
+        process.stderr = err
+    return process
+
 def get_functions(module):
     def is_public_function(obj):
         return callable(obj) and not obj.__name__.startswith('_')
@@ -80,18 +90,17 @@ _run_completion_install
 # run.py
 [[ $PS1 && -f {completion_file} ]] && source {completion_file}
 '''
-    cmd = f'''echo '{load_script}' >> ~/.bashrc'''
-    subprocess.run(cmd, shell=True, check=True)
+    run(f'''echo '{load_script}' >> ~/.bashrc''')
     print(f'installed {completion_file}, restart shell session to use it.')
+
 def install():
     current_file_path = os.path.abspath(__file__)
-    cmd = f'''
+    run(f'''
 TARGET_FILE=/usr/local/bin/run
 sudo cp {current_file_path} $TARGET_FILE
 sudo chmod 755 $TARGET_FILE
 ls -alh $TARGET_FILE
-'''
-    subprocess.run(cmd, shell=True)
+''')
 
     install_bash_completion()
 
