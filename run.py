@@ -4,7 +4,10 @@ import os
 import subprocess
 
 def get_functions(module):
-    return [fn for fn, obj in vars(module).items() if callable(obj)]
+    def is_public_function(obj):
+        return callable(obj) and not obj.__name__.startswith('_')
+    items = vars(module).items()
+    return [fn for fn, obj in items if is_public_function(obj)]
 
 def list_functions():
     module = load_runfile()
@@ -30,15 +33,15 @@ import sys
 def hello(): 
     print(f'hello from {__file__}')
 
-def main():
+def __main():
     def list_functions():
         for fn, obj in globals().items():
-            if callable(obj): print(fn)
+            if callable(obj) and not fn.startswith('_'): print(fn)
     if len(sys.argv) < 2: return list_functions()
     _, name, *args = sys.argv
     code = globals()[name](*args)
     sys.exit(code)
-if __name__ == "__main__": main()
+if __name__ == "__main__": __main()
 '''
     file = './Runfile.py'
     write_text_file(content, file)
@@ -106,7 +109,7 @@ def run_runfile_task(fn, args):
         print(f'invalid function: {fn}')
         list_functions()
 
-def main():
+def __main():
     # print(sys.argv)
     if len(sys.argv) < 2:
         list_or_generate_script()
@@ -116,4 +119,4 @@ def main():
     if local: run_local_task(fn, args)
     else: run_runfile_task(fn, args)
 
-if __name__ == "__main__": main()
+if __name__ == "__main__": __main()
