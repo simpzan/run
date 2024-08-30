@@ -24,6 +24,7 @@ def load_runfile():
     return module
 
 def write_text_file(text, file):
+    file = os.path.expanduser(file)
     with open(file, "w") as file:
         file.write(text)
 def generate_script():
@@ -55,8 +56,8 @@ def list_or_generate_script():
     else:
         generate_script()
 
-def install_bash_complete():
-    content = '''
+def install_bash_completion():
+    content = r'''
 _run_completion_complete() {
   [[ ! -f ./Runfile.py ]] && return
   local prefix=${COMP_WORDS[$COMP_CWORD]}
@@ -72,18 +73,16 @@ _run_completion_install() {
 }
 _run_completion_install
 '''
-    home_dir = os.path.expanduser('~')
-    complete_file = f'{home_dir}/.run.bash'
-    write_text_file(content, complete_file)
+    completion_file = '~/.run.bash_completion'
+    write_text_file(content.lstrip(), completion_file)
 
-    bashrc_file = f'{home_dir}/.bashrc'
-    cmd = f'''
-ls -alh {complete_file}
-echo '[[ $PS1 && -f ~/.run.bash ]] && source ~/.run.bash' >> {bashrc_file}
-set -x
-tail -n1 {bashrc_file}
+    load_script = f'''
+# run.py
+[[ $PS1 && -f {completion_file} ]] && source {completion_file}
 '''
-    subprocess.run(cmd, shell=True)
+    cmd = f'''echo '{load_script}' >> ~/.bashrc'''
+    subprocess.run(cmd, shell=True, check=True)
+    print(f'installed {completion_file}, restart shell session to use it.')
 def install():
     current_file_path = os.path.abspath(__file__)
     cmd = f'''
@@ -94,7 +93,7 @@ ls -alh $TARGET_FILE
 '''
     subprocess.run(cmd, shell=True)
 
-    install_bash_complete()
+    install_bash_completion()
 
 def run_local_task(fn, args):
     func = globals().get(fn)
