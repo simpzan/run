@@ -12,7 +12,10 @@
 
 # install
 ```bash
+# bash version
 curl https://raw.githubusercontent.com/simpzan/run/main/run.rc -o `mktemp` && bash $_
+# python version
+curl https://raw.githubusercontent.com/simpzan/run/main/run.py -o `mktemp` && LOCAL=1 python3 $_ install
 ```
 
 # use
