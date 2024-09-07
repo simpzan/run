@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import sys
-import subprocess
 
 class Log:
     def __init__(self, name=__name__):
@@ -30,9 +29,10 @@ def log_test():
 
 # sync or not, pipe or get result
 def sh(cmds, wait=5, pipe=False):
+    import subprocess
     stdout = subprocess.PIPE if pipe else None
     process = subprocess.Popen(cmds, shell=True, text=True, stdout=stdout, stderr=stdout)
-    if wait <= 0: return process
+    if wait == 0: return process
     out, err = process.communicate(timeout=wait)
     if pipe:
         process.stdout = out
@@ -44,6 +44,9 @@ def sh_async(cmds):
     return sh(cmds, wait=0)
 def sh_out_async(cmds):
     return sh(cmds, wait=0, pipe=True)
+
+def ssh_test():
+    sh('ssh jx', wait=None)
 
 def shell(func):
     def wrapper_shell(*args, **kwargs):
