@@ -2,25 +2,25 @@
 import sys
 import subprocess
 
-import logging
-format = '%(levelno)s %(created)f %(process)d:%(thread)d %(filename)s:%(lineno)d %(message)s'
-logging.basicConfig(format=format, level=logging.DEBUG)
-class log:
-    @staticmethod
-    def v(msg, *args, **kwargs): logging.debug(msg, *args, **kwargs)
-    @staticmethod
-    def d(msg, *args, **kwargs): logging.debug(msg, *args, **kwargs)
-    @staticmethod
-    def i(msg, *args, **kwargs): logging.info(msg, *args, **kwargs)
-    @staticmethod
-    def w(msg, *args, **kwargs): logging.warning(msg, *args, **kwargs)
-    @staticmethod
-    def e(msg, *args, **kwargs): logging.error(msg, *args, **kwargs)
-    @staticmethod
-    def f(msg, *args, **kwargs): logging.critical(msg, *args, **kwargs)
+class Log:
+    def __init__(self, name=__name__):
+        import logging
+        self.log = logging.getLogger(name)
+        format = '%(levelname)s %(created)f %(process)d:%(thread)d %(filename)s:%(lineno)d %(message)s'
+        logging.basicConfig(format=format, level=logging.DEBUG)
+        for idx, char in enumerate('NDIWEF'): logging.addLevelName(idx*10, char)
+    def v(self, msg, *args, **kwargs): self.log.debug(msg, stacklevel=2, *args, **kwargs)
+    def d(self, msg, *args, **kwargs): self.log.debug(msg, stacklevel=2, *args, **kwargs)
+    def i(self, msg, *args, **kwargs): self.log.info(msg, stacklevel=2, *args, **kwargs)
+    def w(self, msg, *args, **kwargs): self.log.warning(msg, stacklevel=2, *args, **kwargs)
+    def e(self, msg, *args, **kwargs): self.log.error(msg, stacklevel=2, *args, **kwargs)
+    def f(self, msg, *args, **kwargs): self.log.critical(msg, stacklevel=2, *args, **kwargs)
+
+log = Log()
 
 def log_test():
     import time
+    log.d("This is an info message.")
     time.sleep(1)
     log.i("This is an info message.")
     time.sleep(1)
