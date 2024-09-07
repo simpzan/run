@@ -3,7 +3,7 @@ import sys
 import os
 import subprocess
 
-def run(cmds, wait=5, pipe=False):
+def sh(cmds, wait=5, pipe=False):
     stdout = subprocess.PIPE if pipe else None
     process = subprocess.Popen(cmds, shell=True, text=True, stdout=stdout, stderr=stdout)
     if wait <= 0: return process
@@ -90,12 +90,12 @@ _run_completion_install
 # run.py
 [[ $PS1 && -f {completion_file} ]] && source {completion_file}
 '''
-    run(f'''echo '{load_script}' >> ~/.bashrc''')
+    sh(f'''echo '{load_script}' >> ~/.bashrc''')
     print(f'installed {completion_file}, restart shell session to use it.')
 
 def install():
     current_file_path = os.path.abspath(__file__)
-    run(f'''
+    sh(f'''
 TARGET_FILE=/usr/local/bin/run
 sudo cp {current_file_path} $TARGET_FILE
 sudo chmod 755 $TARGET_FILE
