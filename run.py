@@ -71,7 +71,7 @@ def install_bash_completion():
 _run_completion_complete() {
   [[ ! -f ./Runfile.py ]] && return
   local prefix=${COMP_WORDS[$COMP_CWORD]}
-  local result=$(compgen -W "$(LOCAL=1 run list_functions)" "$prefix")
+  local result=$(compgen -W "$(run %list_functions)" "$prefix")
   COMPREPLY=($result)
 }
 _run_completion_install() {
@@ -123,8 +123,7 @@ def __main():
         list_or_generate_script()
         return
     _, fn, *args = sys.argv
-    local = os.environ.get("LOCAL", '') == '1'
-    if local: run_local_task(fn, args)
+    if fn.startswith('%'): run_local_task(fn[1:], args)
     else: run_runfile_task(fn, args)
 
 if __name__ == "__main__": __main()
