@@ -106,9 +106,9 @@ ls -alh $TARGET_FILE
 
 def run_local_task(fn, args):
     func = globals().get(fn)
-    if func is not None:
-        func(*args)
-        return
+    if func: func(*args)
+    else: print(f'invalid local function: {fn}')
+
 def run_runfile_task(fn, args):
     tasks = load_runfile()
     if hasattr(tasks, fn):
@@ -118,10 +118,8 @@ def run_runfile_task(fn, args):
         list_functions()
 
 def __main():
-    # print(sys.argv)
     if len(sys.argv) < 2:
-        list_or_generate_script()
-        return
+        return list_or_generate_script()
     _, fn, *args = sys.argv
     if fn.startswith('%'): run_local_task(fn[1:], args)
     else: run_runfile_task(fn, args)
