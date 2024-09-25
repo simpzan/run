@@ -13,9 +13,9 @@
 # install
 ```bash
 # bash version
-curl https://raw.githubusercontent.com/simpzan/run/main/run.rc -o `mktemp` && bash $_
+curl -OL https://raw.githubusercontent.com/simpzan/run/main/run.rc && bash run.rc
 # python version
-curl https://raw.githubusercontent.com/simpzan/run/main/run.py -o `mktemp` && python3 $_ %install
+curl -OL https://raw.githubusercontent.com/simpzan/run/main/run.py && python3 run.py %install
 ```
 
 # use
