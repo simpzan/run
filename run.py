@@ -59,13 +59,6 @@ if __name__ == "__main__": __main()
     os.chmod(file, 0o755)
     print('Runfile.py created!')
 
-
-def list_or_generate_script():
-    if os.path.exists('./Runfile.py'):
-        list_functions()
-    else:
-        generate_script()
-
 def install_bash_completion():
     content = r'''
 _run_completion_complete() {
@@ -94,6 +87,7 @@ _run_completion_install
     print(f'installed {completion_file}, restart shell session to use it.')
 
 def install():
+    print('installing `run` command')
     current_file_path = os.path.abspath(__file__)
     sh(f'''
 TARGET_FILE=/usr/local/bin/run
@@ -103,6 +97,7 @@ ls -alh $TARGET_FILE
 ''')
 
     install_bash_completion()
+    print('installed `run` command')
 
 def run_local_task(fn, args):
     func = globals().get(fn)
@@ -119,7 +114,11 @@ def run_runfile_task(fn, args):
 
 def __main():
     if len(sys.argv) < 2:
-        return list_or_generate_script()
+        if os.path.exists('./Runfile.py'):
+            list_functions()
+        else:
+            generate_script()
+        return
     _, fn, *args = sys.argv
     if fn.startswith('%'): run_local_task(fn[1:], args)
     else: run_runfile_task(fn, args)
