@@ -110,7 +110,7 @@ run() {
 def install():
     site_packages_dir = sys.path[-1]
     current_file_path = os.path.abspath(__file__)
-    sh(f'''set -x; cp {current_file_path} {site_packages_dir}''')
+    sh(f'''set -x; sudo cp {current_file_path} {site_packages_dir}''')
 
     install_bash_completion()
     print('installed `run` command')
