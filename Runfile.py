@@ -1,21 +1,6 @@
 #!/usr/bin/env python3
 import sys
-
-class Log:
-    def __init__(self, name=__name__):
-        import logging
-        self.log = logging.getLogger(name)
-        format = '%(levelname)s %(created)f %(process)d:%(thread)d %(filename)s:%(lineno)d %(message)s'
-        logging.basicConfig(format=format, level=logging.DEBUG)
-        for idx, char in enumerate('NDIWEF'): logging.addLevelName(idx*10, char)
-    def v(self, msg, *args, **kwargs): self.log.debug(msg, stacklevel=2, *args, **kwargs)
-    def d(self, msg, *args, **kwargs): self.log.debug(msg, stacklevel=2, *args, **kwargs)
-    def i(self, msg, *args, **kwargs): self.log.info(msg, stacklevel=2, *args, **kwargs)
-    def w(self, msg, *args, **kwargs): self.log.warning(msg, stacklevel=2, *args, **kwargs)
-    def e(self, msg, *args, **kwargs): self.log.error(msg, stacklevel=2, *args, **kwargs)
-    def f(self, msg, *args, **kwargs): self.log.critical(msg, stacklevel=2, *args, **kwargs)
-
-log = Log()
+from run import sh, log
 
 def log_test():
     import time
@@ -27,17 +12,6 @@ def log_test():
     time.sleep(1)
     log.e("This is an error message.")
 
-# sync or not, pipe or get result
-def sh(cmds, wait=5, pipe=False):
-    import subprocess
-    stdout = subprocess.PIPE if pipe else None
-    process = subprocess.Popen(cmds, shell=True, text=True, stdout=stdout, stderr=stdout)
-    if wait == 0: return process
-    out, err = process.communicate(timeout=wait)
-    if pipe:
-        process.stdout = out
-        process.stderr = err
-    return process
 def sh_out(cmds):
     return sh(cmds, pipe=True).stdout
 def sh_async(cmds):
@@ -46,7 +20,7 @@ def sh_out_async(cmds):
     return sh(cmds, wait=0, pipe=True)
 
 def ssh_test():
-    sh('ssh jx', wait=None)
+    sh('ssh jx')
 
 def shell(func):
     def wrapper_shell(*args, **kwargs):
