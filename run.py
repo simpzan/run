@@ -4,7 +4,7 @@ import os
 import subprocess
 import importlib.util
 
-class Log:
+class _Log:
     def __init__(self, name=__name__):
         import logging
         self.log = logging.getLogger(name)
@@ -17,7 +17,7 @@ class Log:
     def w(self, msg, *args, **kwargs): self.log.warning(msg, stacklevel=2, *args, **kwargs)
     def e(self, msg, *args, **kwargs): self.log.error(msg, stacklevel=2, *args, **kwargs)
     def f(self, msg, *args, **kwargs): self.log.critical(msg, stacklevel=2, *args, **kwargs)
-log = Log()
+log = _Log()
 
 def sh(cmds, wait=None, pipe=False):
     stdout = subprocess.PIPE if pipe else None
@@ -29,7 +29,7 @@ def sh(cmds, wait=None, pipe=False):
         process.stderr = err
     return process
 
-def get_functions(module):
+def _get_functions(module):
     def is_public_function(obj):
         return \
             callable(obj) and \
@@ -39,15 +39,15 @@ def get_functions(module):
     return [fn for fn, obj in items if is_public_function(obj)]
 
 def list_functions(filename='Runfile.py'):
-    module = load_module(filename)
-    for fn in get_functions(module): print(fn)
+    module = _load_module(filename)
+    for fn in _get_functions(module): print(fn)
 
-def load_module(file_path):
+def _load_module(file_path):
     name = os.path.splitext(os.path.basename(file_path))[0]
     spec = importlib.util.spec_from_file_location(name, file_path)
     return spec.loader.load_module()
 
-def write_text_file(text, file, mode='w'):
+def _write_text_file(text, file, mode='w'):
     file = os.path.expanduser(file)
     with open(file, mode) as file:
         file.write(text)
@@ -60,11 +60,11 @@ def hello():
 if __name__ == "__main__": run_main(__file__)
 '''
     file = './Runfile.py'
-    write_text_file(content, file)
+    _write_text_file(content, file)
     os.chmod(file, 0o755)
     print('Runfile.py created!')
 
-def install_bash_commands():
+def _install_bash_commands():
     content = r'''
 _run_completion_complete() {
   [[ ! -f ./Runfile.py ]] && return
@@ -98,10 +98,10 @@ run() {
 
 '''
     completion_file = '~/.run.bash'
-    write_text_file(content.lstrip(), completion_file)
+    _write_text_file(content.lstrip(), completion_file)
 
     load_script = f'[[ $PS1 && -f {completion_file} ]] && source {completion_file}\n'
-    write_text_file(load_script, '~/.bashrc', 'a')
+    _write_text_file(load_script, '~/.bashrc', 'a')
     print(f'installed {completion_file}, restart shell session to use it.')
 
 def install():
@@ -109,11 +109,11 @@ def install():
     current_file_path = os.path.abspath(__file__)
     sh(f'''set -x; sudo cp {current_file_path} {site_packages_dir}''')
 
-    install_bash_commands()
+    _install_bash_commands()
     print('installed `run` command')
 
-def run_task_file(filename, fn, args):
-    tasks = load_module(filename)
+def _run_task_file(filename, fn, args):
+    tasks = _load_module(filename)
     if hasattr(tasks, fn):
         return getattr(tasks, fn)(*args)
     else: 
@@ -124,7 +124,7 @@ def run_task_file(filename, fn, args):
 def run_main(filename):
     if len(sys.argv) < 2: return list_functions(filename)
     _, fn, *args = sys.argv
-    code = run_task_file(filename, fn, args)
+    code = _run_task_file(filename, fn, args)
     sys.exit(code)
 
 if __name__ == "__main__": run_main(__file__)
