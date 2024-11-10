@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import run
-from run import sh, log
+from run import sh, sh_out, sh_async, sh_out_async, log
 
 def log_test():
     import time
@@ -11,13 +11,6 @@ def log_test():
     log.w("This is a warning message.")
     time.sleep(1)
     log.e("This is an error message.")
-
-def sh_out(cmds):
-    return sh(cmds, pipe=True).stdout
-def sh_async(cmds):
-    return sh(cmds, wait=0)
-def sh_out_async(cmds):
-    return sh(cmds, wait=0, pipe=True)
 
 def ssh_test():
     sh('ssh jx')

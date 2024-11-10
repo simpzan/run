@@ -28,6 +28,12 @@ def sh(cmds, wait=None, pipe=False):
         process.stdout = out
         process.stderr = err
     return process
+def sh_out(cmds):
+    return sh(cmds, pipe=True).stdout
+def sh_async(cmds):
+    return sh(cmds, wait=0)
+def sh_out_async(cmds):
+    return sh(cmds, wait=0, pipe=True)
 
 def _get_functions(module):
     def is_public_function(obj):
