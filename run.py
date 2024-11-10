@@ -2,7 +2,7 @@
 import sys
 import os
 import subprocess
-print(__file__)
+import importlib.util
 
 class Log:
     def __init__(self, name=__name__):
@@ -36,15 +36,13 @@ def get_functions(module):
     return [fn for fn, obj in items if is_public_function(obj)]
 
 def list_functions(filename='Runfile.py'):
-    module = load_runfile(filename)
+    module = load_module(filename)
     for fn in get_functions(module): print(fn)
 
-def load_runfile(file_path):
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("my_module", file_path)
-    module = importlib.util.module_from_spec(spec)
-    module = spec.loader.load_module()
-    return module
+def load_module(file_path):
+    name = os.path.splitext(os.path.basename(file_path))[0]
+    spec = importlib.util.spec_from_file_location(name, file_path)
+    return spec.loader.load_module()
 
 def write_text_file(text, file):
     file = os.path.expanduser(file)
@@ -115,7 +113,7 @@ def install():
     print('installed `run` command')
 
 def run_task_file(filename, fn, args):
-    tasks = load_runfile(filename)
+    tasks = load_module(filename)
     if hasattr(tasks, fn):
         getattr(tasks, fn)(*args)
     else: 
