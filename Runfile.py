@@ -28,4 +28,11 @@ def shell_test():
     print('p_async_pipe', out.strip())
     p_async_stream.wait()
 
-if __name__ == "__main__": run_main(__file__)
+def __minimal_main():
+    import sys
+    _, name, *args = sys.argv
+    globals()[name](*args)
+
+if __name__ == "__main__":
+    __minimal_main()
+    # run_main(__file__)
