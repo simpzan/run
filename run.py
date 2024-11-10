@@ -51,36 +51,22 @@ def _write_text_file(text, file, mode='w'):
     file = os.path.expanduser(file)
     with open(file, mode) as file:
         file.write(text)
-def generate_script():
-    content = '''#!/usr/bin/env python3
+
+template_Runfile_py = '''
+#!/usr/bin/env python3
 from run import sh, log, run_main
 def hello():
     log.i('kernel info')
     sh("uname -a")
 if __name__ == "__main__": run_main(__file__)
 '''
-    file = './Runfile.py'
-    _write_text_file(content, file)
+def generate_script():
+    file = 'Runfile.py'
+    _write_text_file(template_Runfile_py.lstrip(), file)
     os.chmod(file, 0o755)
-    print('Runfile.py created!')
+    print(f'{file} created!')
 
-def _install_bash_commands():
-    content = r'''
-_run_completion_complete() {
-  [[ ! -f ./Runfile.py ]] && return
-  local prefix=${COMP_WORDS[$COMP_CWORD]}
-  local result=$(compgen -W "$(python3 -m run list_functions)" "$prefix")
-  COMPREPLY=($result)
-}
-_run_completion_install() {
-  if [[ -n "${ZSH_VERSION+x}" ]]; then
-    ! which compinit >/dev/null && autoload -Uz compinit && compinit
-    ! which bashcompinit >/dev/null && autoload -Uz bashcompinit && bashcompinit
-  fi
-  complete -F _run_completion_complete run Runfile.py
-}
-_run_completion_install
-
+bash_script = r'''
 run() {
   if [[ -z "$@" ]]; then
     if [[ -f ./Runfile.py ]]; then
@@ -95,21 +81,33 @@ run() {
     time python3 ./Runfile.py "$@"
   fi
 }
-
+_run_completion_complete() {
+  [[ ! -f ./Runfile.py ]] && return
+  local prefix=${COMP_WORDS[$COMP_CWORD]}
+  local result=$(compgen -W "$(python3 -m run list_functions)" "$prefix")
+  COMPREPLY=($result)
+}
+_run_completion_install() {
+  if [[ -n "${ZSH_VERSION+x}" ]]; then
+    ! which compinit >/dev/null && autoload -Uz compinit && compinit
+    ! which bashcompinit >/dev/null && autoload -Uz bashcompinit && bashcompinit
+  fi
+  complete -F _run_completion_complete run Runfile.py
+}
+_run_completion_install
 '''
-    completion_file = '~/.run.bash'
-    _write_text_file(content.lstrip(), completion_file)
-
-    load_script = f'[[ $PS1 && -f {completion_file} ]] && source {completion_file}\n'
-    _write_text_file(load_script, '~/.bashrc', 'a')
-    print(f'installed {completion_file}, restart shell session to use it.')
-
 def install():
     site_packages_dir = sys.path[-1]
     current_file_path = os.path.abspath(__file__)
     sh(f'''set -x; sudo cp {current_file_path} {site_packages_dir}''')
 
-    _install_bash_commands()
+    bash_file = '~/.run.bash'
+    _write_text_file(bash_script.lstrip(), bash_file)
+
+    load_script = f'[[ $PS1 && -f {bash_file} ]] && source {bash_file}\n'
+    _write_text_file(load_script, '~/.bashrc', 'a')
+    print(f'installed {bash_file}, restart shell session to use it.')
+
     print('installed `run` command')
 
 def _run_task_file(filename, fn, args):
