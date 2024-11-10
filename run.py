@@ -2,6 +2,7 @@
 import sys
 import os
 import subprocess
+print(__file__)
 
 class Log:
     def __init__(self, name=__name__):
@@ -79,7 +80,7 @@ def install_bash_completion():
 _run_completion_complete() {
   [[ ! -f ./Runfile.py ]] && return
   local prefix=${COMP_WORDS[$COMP_CWORD]}
-  local result=$(compgen -W "$(run %list_functions)" "$prefix")
+  local result=$(compgen -W "$(python3 -m run list_functions)" "$prefix")
   COMPREPLY=($result)
 }
 _run_completion_install() {
@@ -90,6 +91,22 @@ _run_completion_install() {
   complete -F _run_completion_complete run Runfile.py
 }
 _run_completion_install
+
+run() {
+  if [[ -z "$@" ]]; then
+    if [[ -f ./Runfile.py ]]; then
+        python3 ./Runfile.py;
+    else
+        python3 -m run generate_script;
+    fi
+  elif [[ "$1" == "-h" ]]; then
+    echo "run, the minimalist's task runner - https://github.com/simpzan/run"
+  else
+    TIMEFORMAT="Task '$1' completed in %3lR"
+    time python3 ./Runfile.py "$@"
+  fi
+}
+
 '''
     completion_file = '~/.run.bash_completion'
     write_text_file(content.lstrip(), completion_file)
@@ -102,14 +119,9 @@ _run_completion_install
     print(f'installed {completion_file}, restart shell session to use it.')
 
 def install():
-    print('installing `run` command')
+    site_packages_dir = sys.path[-1]
     current_file_path = os.path.abspath(__file__)
-    sh(f'''
-TARGET_FILE=/usr/local/bin/run
-sudo cp {current_file_path} $TARGET_FILE
-sudo chmod 755 $TARGET_FILE
-ls -alh $TARGET_FILE
-''')
+    sh(f'''set -x; cp {current_file_path} {site_packages_dir}''')
 
     install_bash_completion()
     print('installed `run` command')
@@ -135,7 +147,6 @@ def __main():
             generate_script()
         return
     _, fn, *args = sys.argv
-    if fn.startswith('%'): run_local_task(fn[1:], args)
-    else: run_runfile_task(fn, args)
+    run_local_task(fn, args)
 
 if __name__ == "__main__": __main()

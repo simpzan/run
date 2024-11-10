@@ -15,7 +15,7 @@
 # bash version
 curl -OL https://raw.githubusercontent.com/simpzan/run/main/run.rc && bash run.rc
 # python version
-curl -OL https://raw.githubusercontent.com/simpzan/run/main/run.py && python3 run.py %install
+curl -OL https://raw.githubusercontent.com/simpzan/run/main/run.py && python3 run.py install
 ```
 
 # use
