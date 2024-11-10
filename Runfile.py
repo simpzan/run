@@ -52,4 +52,4 @@ def test():
     print('p_async_pipe', out.strip())
     p_async_stream.wait()
 
-if __name__ == "__main__": run.run_main()
+if __name__ == "__main__": run.run_main(__file__)

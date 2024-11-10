@@ -35,15 +35,12 @@ def get_functions(module):
     items = vars(module).items()
     return [fn for fn, obj in items if is_public_function(obj)]
 
-def list_functions():
-    module = load_runfile()
+def list_functions(filename='Runfile.py'):
+    module = load_runfile(filename)
     for fn in get_functions(module): print(fn)
 
-def load_runfile():
+def load_runfile(file_path):
     import importlib.util
-
-    file_path = os.path.join(os.getcwd(), "Runfile.py")
-
     spec = importlib.util.spec_from_file_location("my_module", file_path)
     module = importlib.util.module_from_spec(spec)
     module = spec.loader.load_module()
@@ -59,7 +56,7 @@ import run
 def hello():
     run.log.i('kernel info')
     run.sh("uname -a")
-if __name__ == "__main__": run.run_main()
+if __name__ == "__main__": run.run_main(__file__)
 '''
     file = './Runfile.py'
     write_text_file(content, file)
@@ -117,32 +114,23 @@ def install():
     install_bash_completion()
     print('installed `run` command')
 
-def run_local_task(fn, args):
-    func = globals().get(fn)
-    if func: func(*args)
-    else: print(f'invalid local function: {fn}')
-
-def run_runfile_task(fn, args):
-    tasks = load_runfile()
+def run_task_file(filename, fn, args):
+    tasks = load_runfile(filename)
     if hasattr(tasks, fn):
         getattr(tasks, fn)(*args)
     else: 
         print(f'invalid function: {fn}')
-        list_functions()
+        list_functions(filename)
 
-def run_main():
-    if len(sys.argv) < 2: return list_functions()
-    _, name, *args = sys.argv
-    sys.exit(run_runfile_task(name, args))
-
-def __main():
+def run_main(filename):
     if len(sys.argv) < 2:
         if os.path.exists('./Runfile.py'):
-            list_functions()
+            list_functions(filename)
         else:
             generate_script()
         return
     _, fn, *args = sys.argv
-    run_local_task(fn, args)
+    code = run_task_file(filename, fn, args)
+    sys.exit(code)
 
-if __name__ == "__main__": __main()
+if __name__ == "__main__": run_main(__file__)
