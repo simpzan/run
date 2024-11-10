@@ -3,10 +3,10 @@ import sys
 import os
 import subprocess
 
-def sh(cmds, wait=5, pipe=False):
+def sh(cmds, wait=None, pipe=False):
     stdout = subprocess.PIPE if pipe else None
     process = subprocess.Popen(cmds, shell=True, text=True, stdout=stdout, stderr=stdout)
-    if wait <= 0: return process
+    if wait == 0: return process
     out, err = process.communicate(timeout=wait)
     if pipe:
         process.stdout = out
