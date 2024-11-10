@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys
+import run
 from run import sh, log
 
 def log_test():
@@ -52,12 +52,4 @@ def test():
     print('p_async_pipe', out.strip())
     p_async_stream.wait()
 
-def __main():
-    def list_functions():
-        for fn, obj in globals().items():
-            if callable(obj) and not fn.startswith('_'): print(fn)
-    if len(sys.argv) < 2: return list_functions()
-    _, name, *args = sys.argv
-    code = globals()[name](*args)
-    sys.exit(code)
-if __name__ == "__main__": __main()
+if __name__ == "__main__": run.run_main()

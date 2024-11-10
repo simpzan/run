@@ -55,20 +55,12 @@ def write_text_file(text, file):
         file.write(text)
 def generate_script():
     content = '''#!/usr/bin/env python3
-import sys
+import run
 
 def hello(): 
     print(f'hello from {__file__}')
 
-def __main():
-    def list_functions():
-        for fn, obj in globals().items():
-            if callable(obj) and not fn.startswith('_'): print(fn)
-    if len(sys.argv) < 2: return list_functions()
-    _, name, *args = sys.argv
-    code = globals()[name](*args)
-    sys.exit(code)
-if __name__ == "__main__": __main()
+if __name__ == "__main__": run.run_main()
 '''
     file = './Runfile.py'
     write_text_file(content, file)
@@ -138,6 +130,11 @@ def run_runfile_task(fn, args):
     else: 
         print(f'invalid function: {fn}')
         list_functions()
+
+def run_main():
+    if len(sys.argv) < 2: return list_functions()
+    _, name, *args = sys.argv
+    sys.exit(run_runfile_task(name, args))
 
 def __main():
     if len(sys.argv) < 2:
