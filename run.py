@@ -56,10 +56,9 @@ def write_text_file(text, file):
 def generate_script():
     content = '''#!/usr/bin/env python3
 import run
-
-def hello(): 
-    print(f'hello from {__file__}')
-
+def hello():
+    run.log.i('kernel info')
+    run.sh("uname -a")
 if __name__ == "__main__": run.run_main()
 '''
     file = './Runfile.py'
