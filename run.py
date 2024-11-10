@@ -84,9 +84,9 @@ _run_completion_install
 run() {
   if [[ -z "$@" ]]; then
     if [[ -f ./Runfile.py ]]; then
-        python3 -m run list_functions
+      python3 -m run list_functions
     else
-        python3 -m run generate_script
+      python3 -m run generate_script
     fi
   elif [[ "$1" == "-h" ]]; then
     echo "run, the minimalist's task runner - https://github.com/simpzan/run"
