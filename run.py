@@ -125,12 +125,7 @@ def run_task_file(filename, fn, args):
         return -1
 
 def run_main(filename):
-    if len(sys.argv) < 2:
-        if os.path.exists('./Runfile.py'):
-            list_functions(filename)
-        else:
-            generate_script()
-        return
+    if len(sys.argv) < 2: return list_functions(filename)
     _, fn, *args = sys.argv
     code = run_task_file(filename, fn, args)
     sys.exit(code)
