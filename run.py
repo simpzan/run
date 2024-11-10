@@ -47,9 +47,9 @@ def load_module(file_path):
     spec = importlib.util.spec_from_file_location(name, file_path)
     return spec.loader.load_module()
 
-def write_text_file(text, file):
+def write_text_file(text, file, mode='w'):
     file = os.path.expanduser(file)
-    with open(file, "w") as file:
+    with open(file, mode) as file:
         file.write(text)
 def generate_script():
     content = '''#!/usr/bin/env python3
@@ -64,7 +64,7 @@ if __name__ == "__main__": run_main(__file__)
     os.chmod(file, 0o755)
     print('Runfile.py created!')
 
-def install_bash_completion():
+def install_bash_commands():
     content = r'''
 _run_completion_complete() {
   [[ ! -f ./Runfile.py ]] && return
@@ -100,11 +100,8 @@ run() {
     completion_file = '~/.run.bash'
     write_text_file(content.lstrip(), completion_file)
 
-    load_script = f'''
-# run.py
-[[ $PS1 && -f {completion_file} ]] && source {completion_file}
-'''
-    sh(f'''echo '{load_script}' >> ~/.bashrc''')
+    load_script = f'[[ $PS1 && -f {completion_file} ]] && source {completion_file}\n'
+    write_text_file(load_script, '~/.bashrc', 'a')
     print(f'installed {completion_file}, restart shell session to use it.')
 
 def install():
@@ -112,7 +109,7 @@ def install():
     current_file_path = os.path.abspath(__file__)
     sh(f'''set -x; sudo cp {current_file_path} {site_packages_dir}''')
 
-    install_bash_completion()
+    install_bash_commands()
     print('installed `run` command')
 
 def run_task_file(filename, fn, args):
