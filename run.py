@@ -31,7 +31,10 @@ def sh(cmds, wait=None, pipe=False):
 
 def get_functions(module):
     def is_public_function(obj):
-        return callable(obj) and not obj.__name__.startswith('_')
+        return \
+            callable(obj) and \
+            not obj.__name__.startswith('_') and \
+            obj.__module__ == module.__name__
     items = vars(module).items()
     return [fn for fn, obj in items if is_public_function(obj)]
 
