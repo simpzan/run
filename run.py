@@ -53,11 +53,11 @@ def write_text_file(text, file):
         file.write(text)
 def generate_script():
     content = '''#!/usr/bin/env python3
-import run
+from run import sh, log, run_main
 def hello():
-    run.log.i('kernel info')
-    run.sh("uname -a")
-if __name__ == "__main__": run.run_main(__file__)
+    log.i('kernel info')
+    sh("uname -a")
+if __name__ == "__main__": run_main(__file__)
 '''
     file = './Runfile.py'
     write_text_file(content, file)
