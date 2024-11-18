@@ -28,10 +28,16 @@ def shell_test():
     print('p_async_pipe', out.strip())
     p_async_stream.wait()
 
+dir_usage = r'''
+du -sh . *
+'''
+
 def __minimal_main():
     import sys
     _, name, *args = sys.argv
-    globals()[name](*args)
+    sym = globals()[name]
+    if callable(sym): sym(*args)
+    else: sh(sym)
 
 if __name__ == "__main__":
     __minimal_main()
