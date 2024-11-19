@@ -57,7 +57,7 @@ def _write_text_file(text, file, mode='w'):
     with open(file, mode) as file:
         file.write(text)
 
-template_Runfile_py = '''
+_template_Runfile_py = '''
 #!/usr/bin/env python3
 from run import sh, log, run_main
 def hello():
@@ -67,11 +67,11 @@ if __name__ == "__main__": run_main(__file__)
 '''
 def generate_script():
     file = 'Runfile.py'
-    _write_text_file(template_Runfile_py.lstrip(), file)
+    _write_text_file(_template_Runfile_py.lstrip(), file)
     os.chmod(file, 0o755)
     print(f'{file} created!')
 
-bash_script = r'''
+_bash_script = r'''
 run() {
   if [[ -z "$@" ]]; then
     if [[ -f ./Runfile.py ]]; then
@@ -107,7 +107,7 @@ def install():
     sh(f'''set -x; sudo cp {current_file_path} {site_packages_dir}''')
 
     bash_file = '~/.run.bash'
-    _write_text_file(bash_script.lstrip(), bash_file)
+    _write_text_file(_bash_script.lstrip(), bash_file)
 
     load_script = f'[[ $PS1 && -f {bash_file} ]] && source {bash_file}\n'
     _write_text_file(load_script, '~/.bashrc', 'a')
