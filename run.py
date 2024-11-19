@@ -36,13 +36,12 @@ def sh_out_async(cmds):
     return sh(cmds, wait=0, pipe=True)
 
 def _get_functions(module):
-    def is_public_function(obj):
-        return \
-            callable(obj) and \
-            not obj.__name__.startswith('_') and \
-            obj.__module__ == module.__name__
+    def is_public(name, obj):
+        if name.startswith('_'): return False
+        if isinstance(obj, str): return True
+        return callable(obj) and obj.__module__ == module.__name__
     items = vars(module).items()
-    return [fn for fn, obj in items if is_public_function(obj)]
+    return [fn for fn, obj in items if is_public(fn, obj)]
 
 def list_functions(filename='Runfile.py'):
     module = _load_module(filename)
