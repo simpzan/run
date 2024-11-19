@@ -118,12 +118,13 @@ def install():
 
 def _run_task_file(filename, fn, args):
     tasks = _load_module(filename)
-    if hasattr(tasks, fn):
-        return getattr(tasks, fn)(*args)
-    else: 
+    if not hasattr(tasks, fn):
         print(f'invalid function: {fn}')
         list_functions(filename)
         return -1
+    sym = getattr(tasks, fn)
+    if callable(sym): return sym(*args)
+    return sh(sym).returncode
 
 def run_main(filename):
     if len(sys.argv) < 2: return list_functions(filename)
