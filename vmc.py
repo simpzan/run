@@ -92,22 +92,23 @@ def _get_pci_devices(vm):
 def _get_ip_of_vm(vm):
     cmd = f'virsh domifaddr {vm}'
     line = sh_out(cmd).strip().split('\n')[-1]
+    if not 'ipv4' in line: return
     ip_full = line.split(' ')[-1]
     ip = ip_full.split('/')[0]
-    print(ip)
     return ip
 
 def _wait_host(ip):
     sh(f'until nc -vzw 2 "{ip}" 22; do sleep 2; done')
 
 def ssh(vm, command=None):
-    ip = _get_ip_of_vm(vm)
-    # if not ip:
-    #     print('ip not found, try again later')
-    #     import time
-    #     time.sleep(1) 
-    #     ip = _get_ip_of_vm(vm)
-    if not ip: return -1
+    vms = _get_vm_list()
+    if not vms[vm]: return print(f'Error: vm {vm} not running')
+    while True:
+        ip = _get_ip_of_vm(vm)
+        if ip: break
+        print('ip not found, try again later')
+        import time
+        time.sleep(2)
     _wait_host(ip)
     cmd = f'sshpass -p amd1234 ssh -o StrictHostKeyChecking=no root@{ip}'
     if command: cmd += f' -t "{command}"'
