@@ -225,11 +225,12 @@ def _parse_kwargs(all_args):
             key, value = arg.split('=')
             kwargs[key] = value
     return args, kwargs
+def _print_functions(prefix=''):
+    for sym, obj in globals().items():
+        if sym.startswith(prefix) and not sym.startswith('_') and callable(obj):
+            print(sym)
 def _main():
-    if len(sys.argv) < 2:
-        for sym, obj in globals().items():
-            if not sym.startswith('_') and callable(obj): print(sym)
-        return
+    if len(sys.argv) < 2: return _print_functions()
     _, name, *args = sys.argv
     sym = globals()[name]
     if callable(sym):
