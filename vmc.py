@@ -52,21 +52,18 @@ def info(vm=None):
     print('')
 
 def mem(vm=None, size=None):
-    if not vm:
-        return sh('free -h')
+    if not vm: return sh('free -h')
     size = int(size) * 1024 * 1024
     print(f"<memory unit='KiB'>{size}</memory><currentMemory unit='KiB'>{size}</currentMemory>")
     input("press Enter to start edit xml file:")
     sh(f'virsh edit {vm}')
 
 def cpu(vm=None, count=None):
-    if not vm:
-        return sh('lscpu | grep -E "^CPU\(s\):|NUMA node"')
+    if not vm: return sh('lscpu | grep -E "^CPU\(s\):|NUMA node"')
     sh(f'virt-xml {vm}  --edit --vcpus {count}')
 
 def gpu(vm=None, devices=None):
-    if not vm:
-        return sh('lspci | grep -E "acc|Display"')
+    if not vm: return sh('lspci | grep -E "acc|Display"')
     cmd = f'virt-xml {vm} --remove-device --host-dev all\n'
     suffix = [f'--host-dev {dev}' for dev in devices.split(',')]
     cmd += f'virt-xml {vm} --add-device ' + ' '.join(suffix)
@@ -228,11 +225,8 @@ def _parse_kwargs(all_args):
             kwargs[key] = value
     return args, kwargs
 def _get_local_functions():
-    out = []
-    for sym, obj in globals().items():
-        if not sym.startswith('_') and callable(obj):
-            out.append(sym)
-    return out
+    return [ name for name, obj in globals().items()
+            if not name.startswith('_') and callable(obj) ]
 def _main():
     if len(sys.argv) < 2: return _print_list(_get_local_functions())
     _, name, *args = sys.argv
