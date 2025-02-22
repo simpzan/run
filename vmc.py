@@ -88,13 +88,16 @@ def ls(**kwargs):
     if '--quiet' in kwargs:
         for name in vms: print(name)
         return
+    verbose = '--v' in kwargs
     name_len_max = max([len(name) for name in vms])
     print(f'{"NAME":<{name_len_max}}\t STATE\tCPU {"MEM":>6} {"IP":>16}  PCI')
     for name in vms:
         running = vms[name]
-        pci = _get_pci_devices(name)
-        cpu = _get_cpu_count(name)
-        mem = _get_memory(name)
+        pci, cpu, mem = [], 0, 0
+        if verbose:
+            pci = _get_pci_devices(name)
+            cpu = _get_cpu_count(name)
+            mem =  _get_memory(name)
         ip = _get_ip_of_vm(name) or '-'
         print(f'{name:<{name_len_max}}\t {running:5} {cpu:>4} {mem:6.1f} {ip:>16}  {pci}')
 
