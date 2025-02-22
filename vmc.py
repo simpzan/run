@@ -36,12 +36,18 @@ def gpu(vm=None, devices=None):
     print(cmd)
     sh(cmd)
 
+def _get_cpu_count(vm):
+    out = sh_out(f'virsh vcpucount {vm} | grep current | grep config')
+    out = out.strip().split(' ')[-1]
+    return int(out)
+
 def ls():
     vms = _get_vm_list()
     for name in vms:
         running = vms[name]
         pci = _get_pci_devices(name)
-        print(f'{name:<{40}}\t {running}\t {pci}')
+        cpu = _get_cpu_count(name)
+        print(f'{name:<{40}}\t {running}\t {cpu:{3}}\t {pci}')
 
 def _get_pci_devices(vm):
     cmd = f'virsh dumpxml "{vm}"'
