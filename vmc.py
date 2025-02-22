@@ -151,7 +151,8 @@ def _write_text_file(text, file, mode='w'):
 
 def _get_gpus():
     texts = sh_out('lspci | grep -E "acc|Display"')
-    return [line.split(' ')[0] for line in texts.split('\n')]
+    out = [line.split(' ')[0] for line in texts.strip().split('\n')]
+    return [f"'{bdf}'" for bdf in out]
 def _print_list(words, prefix=''):
     for word in words:
         if word.startswith(prefix): print(word)
@@ -160,6 +161,7 @@ def _complete(*args):
     words = [word for word in COMP_LINE.split(' ') if len(word) > 0]
     word1 = args[1]
     if len(word1) == 0: words.append('')
+    else: word1 = words[-1]
     if len(words) == 2: return _print_list(_get_local_functions(), word1)
     if words[1] == 'gpu' and len(words) > 3:
         return _print_list(_get_gpus(), word1)
