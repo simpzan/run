@@ -48,9 +48,7 @@ def cpu(vm=None, count=None):
     if not vm:
         sh('lscpu | grep -E "^CPU\(s\):|NUMA node"')
         return
-    print(f"<vcpu placement='static'>{count}</vcpu>")
-    input("press Enter to start edit xml file:")
-    sh(f'virsh edit {vm}')
+    sh(f'virt-xml {vm}  --edit --vcpus {count}')
 
 def gpu(vm=None, devices=None):
     if not vm:
