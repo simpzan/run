@@ -89,13 +89,14 @@ def ls(**kwargs):
         for name in vms: print(name)
         return
     name_len_max = max([len(name) for name in vms])
-    print(f'{"NAME":<{name_len_max}}\t STATE\tCPU  MEM   PCI')
+    print(f'{"NAME":<{name_len_max}}\t STATE\tCPU {"MEM":>6} {"IP":>16}  PCI')
     for name in vms:
         running = vms[name]
         pci = _get_pci_devices(name)
         cpu = _get_cpu_count(name)
         mem = _get_memory(name)
-        print(f'{name:<{name_len_max}}\t {running}\t{cpu:<{3}}  {mem:.1f}  {pci}')
+        ip = _get_ip_of_vm(name) or '-'
+        print(f'{name:<{name_len_max}}\t {running:5} {cpu:>4} {mem:6.1f} {ip:>16}  {pci}')
 
 def _get_pci_devices(vm):
     texts = sh_out(f'virsh dumpxml "{vm}"').strip()
