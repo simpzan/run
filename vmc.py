@@ -83,8 +83,11 @@ def _get_memory(vm):
     el = ET.fromstring(xml_string).find('.//currentMemory')
     return int(el.text) / 1024 / 1024
 
-def ls():
+def ls(**kwargs):
     vms = _get_vm_list()
+    if '--quiet' in kwargs:
+        for name in vms: print(name)
+        return
     name_len_max = max([len(name) for name in vms])
     print(f'{"NAME":<{name_len_max}}\t STATE\tCPU  MEM   PCI')
     for name in vms:
