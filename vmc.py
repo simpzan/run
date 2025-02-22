@@ -26,6 +26,14 @@ def _get_vm_list():
         vms[name] = state == 'running'
     return vms
 
+def info():
+    print('---- CPU info ----')
+    sh('lscpu | grep -E "^CPU\(s\):|NUMA node"')
+    print('---- memory info ----')
+    sh('free -h')
+    print('---- GPU info ----')
+    gpu()
+
 def gpu(vm=None, devices=None):
     if not vm:
         sh('lspci | grep -E "acc|Display"')
