@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.12
+#!/usr/bin/env python3
 import xml.etree.ElementTree as ET
 from run import sh, sh_out, log, run_main
 
