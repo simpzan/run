@@ -155,19 +155,24 @@ def _write_text_file(text, file, mode='w'):
     with open(file, mode) as file:
         file.write(text)
 
+def _get_gpus():
+    texts = sh_out('lspci | grep -E "acc|Display"')
+    return [line.split(' ')[0] for line in texts.split('\n')]
+def _print_list(words, prefix=''):
+    for word in words:
+        if word.startswith(prefix): print(word)
+def _complete(*args):
+    COMP_LINE = os.environ['COMP_LINE']
+    words = [word for word in COMP_LINE.split(' ') if len(word) > 0]
+    word1 = args[1]
+    if len(word1) == 0: words.append('')
+    if len(words) == 2: return _print_functions(word1)
+    if words[1] == 'gpu' and len(words) > 3:
+        return _print_list(_get_gpus(), word1)
+    _print_list(_get_vm_list(), word1)
 _bash_script = r'''
 vm() { python3 -m vmc "$@"; }
-_vm_completion_complete() {
-  local prefix=${COMP_WORDS[$COMP_CWORD]}
-  local list
-  if [[ "${COMP_CWORD}" == "1" ]]; then
-    list="$(python3 -m vmc)"
-  else
-    list="$(python3 -m vmc ls --quiet)"
-  fi
-  COMPREPLY=($(compgen -W "$list" "$prefix"))
-}
-complete -F _vm_completion_complete vm vmc.py
+complete -C "python3 -m vmc _complete" vm vmc.py
 '''
 def install():
     sh(f'apt install -y guestfs-tools sshpass')
