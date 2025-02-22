@@ -1,6 +1,21 @@
 #!/usr/bin/env python3
+import sys
+import os
+import subprocess
+import time
 import xml.etree.ElementTree as ET
-from run import sh, sh_out, log, run_main
+
+def sh(cmds, wait=None, pipe=False):
+    stdout = subprocess.PIPE if pipe else None
+    process = subprocess.Popen(cmds, shell=True, text=True, stdout=stdout, stderr=stdout)
+    if wait == 0: return process
+    out, err = process.communicate(timeout=wait)
+    if pipe:
+        process.stdout = out
+        process.stderr = err
+    return process
+def sh_out(cmds):
+    return sh(cmds, pipe=True).stdout
 
 def _parse_pci_addresses(xml_string):
     try:
@@ -127,7 +142,6 @@ def ssh(vm, command=None):
         ip = _get_ip_of_vm(vm)
         if ip: break
         print('ip not found, try again later')
-        import time
         time.sleep(2)
     _wait_host(ip)
     cmd = f'sshpass -p amd1234 ssh -o StrictHostKeyChecking=no root@{ip}'
@@ -160,7 +174,6 @@ def _get_hdd(vm):
     return hdd
 
 def _fork_one_vm(base, base_hdd, vm):
-    import os.path
     new_hdd = f'{os.path.dirname(base_hdd)}/{vm}.qcow2'
     cmd = f'''qemu-img create -f qcow2 -F qcow2 -b {base_hdd} "{new_hdd}" &&
         virt-clone --original "{base}" --name "{vm}" --file "{new_hdd}" --preserve-data &&
@@ -186,4 +199,12 @@ def stop(*vms):
     for vm in vms:
         if vms_info[vm]: sh(f'virsh destroy {vm}')
 
-if __name__ == "__main__": run_main(__file__)
+def _main():
+    if len(sys.argv) < 2:
+        for sym, obj in globals().items():
+            if not sym.startswith('_') and callable(obj): print(sym)
+        return
+    _, name, *args = sys.argv
+    sym = globals()[name]
+    if callable(sym): sym(*args)
+if __name__ == "__main__": _main()
