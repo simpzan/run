@@ -122,8 +122,21 @@ def _run_task_file(filename, fn, args):
         list_functions(filename)
         return -1
     sym = getattr(tasks, fn)
-    if callable(sym): return sym(*args)
+    if callable(sym):
+        args, kwargs = _parse_kwargs(args)
+        return sym(*args, **kwargs)
     return sh(sym).returncode
+
+def _parse_kwargs(all_args):
+    kwargs = {}
+    args = []
+    for arg in all_args:
+        if not arg.startswith('--'): args.append(arg)
+        elif not '=' in arg: kwargs[arg] = ''
+        else:
+            key, value = arg.split('=')
+            kwargs[key] = value
+    return args, kwargs
 
 def run_main(filename):
     if len(sys.argv) < 2: return list_functions(filename)

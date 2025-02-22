@@ -32,6 +32,9 @@ dir_usage = r'''
 du -sh . *
 '''
 
+def kwargs_test(*args, **kwargs):
+    print(args, kwargs)
+
 def __minimal_main():
     import sys
     _, name, *args = sys.argv
@@ -40,5 +43,5 @@ def __minimal_main():
     else: sh(sym)
 
 if __name__ == "__main__":
-    __minimal_main()
-    # run_main(__file__)
+    # __minimal_main()
+    run_main(__file__)
