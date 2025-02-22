@@ -62,11 +62,12 @@ def cpu(vm=None, count=None):
     if not vm: return sh('lscpu | grep -E "^CPU\(s\):|NUMA node"')
     sh(f'virt-xml {vm}  --edit --vcpus {count}')
 
-def gpu(vm=None, devices=None):
+def gpu(vm=None, *devices):
     if not vm: return sh('lspci | grep -E "acc|Display"')
     cmd = f'virt-xml {vm} --remove-device --host-dev all\n'
-    suffix = [f'--host-dev {dev}' for dev in devices.split(',')]
-    cmd += f'virt-xml {vm} --add-device ' + ' '.join(suffix)
+    if devices:
+        suffix = [f'--host-dev {dev}' for dev in devices]
+        cmd += f'virt-xml {vm} --add-device ' + ' '.join(suffix)
     sh(cmd)
 
 def _get_cpu_count(vm):
