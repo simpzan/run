@@ -148,6 +148,9 @@ def fork(base, vm):
         virt-sysprep -d {vm} --operation machine-id'''
     sh(cmd)
 
+def rm(vm):
+    sh(f'virsh undefine {vm}')
+
 def start(vm):
     sh(f'virsh start {vm}')
 
