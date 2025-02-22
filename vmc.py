@@ -85,9 +85,6 @@ def _get_memory(vm):
 
 def ls(**kwargs):
     vms = _get_vm_list()
-    if '--quiet' in kwargs:
-        for name in vms: print(name)
-        return
     verbose = '--v' in kwargs
     name_len_max = max([len(name) for name in vms])
     print(f'{"NAME":<{name_len_max}}\t STATE\tCPU {"MEM":>6} {"IP":>16}  PCI')
@@ -166,7 +163,7 @@ def _complete(*args):
     words = [word for word in COMP_LINE.split(' ') if len(word) > 0]
     word1 = args[1]
     if len(word1) == 0: words.append('')
-    if len(words) == 2: return _print_functions(word1)
+    if len(words) == 2: return _print_list(_get_local_functions(), word1)
     if words[1] == 'gpu' and len(words) > 3:
         return _print_list(_get_gpus(), word1)
     _print_list(_get_vm_list(), word1)
@@ -230,12 +227,14 @@ def _parse_kwargs(all_args):
             key, value = arg.split('=')
             kwargs[key] = value
     return args, kwargs
-def _print_functions(prefix=''):
+def _get_local_functions():
+    out = []
     for sym, obj in globals().items():
-        if sym.startswith(prefix) and not sym.startswith('_') and callable(obj):
-            print(sym)
+        if not sym.startswith('_') and callable(obj):
+            out.append(sym)
+    return out
 def _main():
-    if len(sys.argv) < 2: return _print_functions()
+    if len(sys.argv) < 2: return _print_list(_get_local_functions())
     _, name, *args = sys.argv
     sym = globals()[name]
     if callable(sym):
