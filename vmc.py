@@ -50,12 +50,14 @@ def _get_memory(vm):
 
 def ls():
     vms = _get_vm_list()
+    name_len_max = max([len(name) for name in vms])
+    print(f'{"NAME":<{name_len_max}}\t STATE\tCPU  MEM   PCI')
     for name in vms:
         running = vms[name]
         pci = _get_pci_devices(name)
         cpu = _get_cpu_count(name)
         mem = _get_memory(name)
-        print(f'{name:<{40}}\t {running}\t{cpu:<{3}}  {mem:.1f}  {pci}')
+        print(f'{name:<{name_len_max}}\t {running}\t{cpu:<{3}}  {mem:.1f}  {pci}')
 
 def _get_pci_devices(vm):
     cmd = f'virsh dumpxml "{vm}"'
