@@ -159,30 +159,31 @@ def _get_hdd(vm):
     hdd = out.strip().split(' ')[-1]
     return hdd
 
-def fork(base, vm):
-    base_hdd = _get_hdd(base)
-    backing_file = sh_out(f'qemu-img info {base_hdd} | grep -E "backing file:"').strip()
-    if backing_file:
-        print(f'Warn: the disk of the vm is derived disk!\n{vm}: {base_hdd}\n{backing_file}')
+def _fork_one_vm(base, base_hdd, vm):
     import os.path
     new_hdd = f'{os.path.dirname(base_hdd)}/{vm}.qcow2'
     cmd = f'''qemu-img create -f qcow2 -F qcow2 -b {base_hdd} "{new_hdd}" &&
         virt-clone --original "{base}" --name "{vm}" --file "{new_hdd}" --preserve-data &&
         virt-sysprep -d {vm} --operation machine-id'''
     sh(cmd)
+def fork(base, *vms):
+    base_hdd = _get_hdd(base)
+    backing_file = sh_out(f'qemu-img info {base_hdd} | grep -E "backing file:"').strip()
+    if backing_file:
+        print(f'Warn: the disk of the vm is derived disk!\n{base}: {base_hdd}\n{backing_file}')
+    for vm in vms: _fork_one_vm(base, base_hdd, vm)
 
-def rm(vm):
-    sh(f'virsh undefine {vm}')
+def rm(*vms):
+    for vm in vms: sh(f'virsh undefine {vm}')
 
-def start(vm):
-    sh(f'virsh start {vm}')
+def start(*vms):
+    for vm in vms: sh(f'virsh start {vm}')
 
-def stop(vm):
-    if vm != '--all':
-        sh(f'virsh destroy {vm}')
-        return
-    vms = _get_vm_list()
+def stop(*vms):
+    if not vms: return
+    vms_info = _get_vm_list()
+    if vms[0] == '--all': vms = vms_info.keys()
     for vm in vms:
-        if vms[vm]: sh(f'virsh destroy {vm}')
+        if vms_info[vm]: sh(f'virsh destroy {vm}')
 
 if __name__ == "__main__": run_main(__file__)
