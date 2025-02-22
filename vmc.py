@@ -17,20 +17,6 @@ def sh(cmds, wait=None, pipe=False):
 def sh_out(cmds):
     return sh(cmds, pipe=True).stdout
 
-def _parse_pci_addresses(xml_string):
-    try:
-        root = ET.fromstring(xml_string)
-        addresses = []
-        for element in root.findall(".//devices/hostdev/source/address"):
-            keys = ['domain', 'bus', 'slot', 'function']
-            domain, bus, device, function = [element.attrib[key][2:] for key in keys]
-            bdf = f'{domain}:{bus}:{device}.{function}'
-            addresses.append(bdf)
-        return addresses
-    except Exception as e: # Catch other potential errors
-        print(f"An unexpected error occurred: {e}")
-        return
-
 def _get_vm_list():
     texts = sh_out(f'virsh list --all')
     lines = texts.strip().split('\n')[2:]
@@ -119,9 +105,13 @@ def ls():
         print(f'{name:<{name_len_max}}\t {running}\t{cpu:<{3}}  {mem:.1f}  {pci}')
 
 def _get_pci_devices(vm):
-    cmd = f'virsh dumpxml "{vm}"'
-    texts = sh_out(cmd).strip()
-    out = _parse_pci_addresses(texts)
+    texts = sh_out(f'virsh dumpxml "{vm}"').strip()
+    out = []
+    for element in ET.fromstring(texts).findall(".//devices/hostdev/source/address"):
+        keys = ['domain', 'bus', 'slot', 'function']
+        domain, bus, device, function = [element.attrib[key][2:] for key in keys]
+        bdf = f'{domain}:{bus}:{device}.{function}'
+        out.append(bdf)
     return out
 
 def _get_ip_of_vm(vm):
