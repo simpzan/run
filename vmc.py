@@ -142,7 +142,7 @@ def _get_hdd(vm):
 def fork(base, vm):
     base_hdd = _get_hdd(base)
     import os.path
-    new_hdd = os.path.dirname(base_hdd) + vm + '.qcow2'
+    new_hdd = f'{os.path.dirname(base_hdd)}/{vm}.qcow2'
     cmd = f'''qemu-img create -f qcow2 -F qcow2 -b {base_hdd} "{new_hdd}" &&
         virt-clone --original "{base}" --name "{vm}" --file "{new_hdd}" --preserve-data &&
         virt-sysprep -d {vm} --operation machine-id'''
