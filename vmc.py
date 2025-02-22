@@ -26,7 +26,27 @@ def _get_vm_list():
         vms[name] = state == 'running'
     return vms
 
-def info():
+def vm_info(vm):
+    vms = _get_vm_list()
+    running = vms[vm]
+    pci = _get_pci_devices(vm)
+    cpu_core = _get_cpu_count(vm)
+    memory = _get_memory(vm)
+    ip = _get_ip_of_vm(vm)
+    hdd = _get_hdd(vm)
+    print(f'''
+Name: {vm}
+Running: {running}
+CPU cores: {cpu_core:<{3}}
+System Memory: {memory:.1f}
+PCI: {pci}
+IP: {ip}
+HDD: {hdd}
+'''.strip())
+    sh(f'qemu-img info {hdd} | grep -E "backing file:|virtual size|disk size"')
+
+def info(vm=None):
+    if vm: return vm_info(vm)
     print('\n---------------- CPU ----------------')
     cpu()
     print('\n---------------- MEM ----------------')
