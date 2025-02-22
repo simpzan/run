@@ -193,10 +193,9 @@ def rm(*vms, **kwargs):
 def start(*vms):
     for vm in vms: sh(f'virsh start {vm}')
 
-def stop(*vms):
-    if not vms: return
+def stop(*vms, **kwargs):
     vms_info = _get_vm_list()
-    if vms[0] == '--all': vms = vms_info.keys()
+    if '--all' in kwargs: vms = vms_info.keys()
     for vm in vms:
         if vms_info[vm]: sh(f'virsh destroy {vm}')
 
