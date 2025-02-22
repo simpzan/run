@@ -27,12 +27,30 @@ def _get_vm_list():
     return vms
 
 def info():
-    print('---- CPU info ----')
-    sh('lscpu | grep -E "^CPU\(s\):|NUMA node"')
-    print('---- memory info ----')
-    sh('free -h')
-    print('---- GPU info ----')
+    print('\n---------------- CPU ----------------')
+    cpu()
+    print('\n---------------- MEM ----------------')
+    mem()
+    print('\n---------------- GPU ----------------')
     gpu()
+    print('')
+
+def mem(vm=None, size=None):
+    if not vm:
+        sh('free -h')
+        return
+    size = int(size) * 1024 * 1024
+    print(f"<memory unit='KiB'>{size}</memory><currentMemory unit='KiB'>{size}</currentMemory>")
+    input("press Enter to start edit xml file:")
+    sh(f'virsh edit {vm}')
+
+def cpu(vm=None, count=None):
+    if not vm:
+        sh('lscpu | grep -E "^CPU\(s\):|NUMA node"')
+        return
+    print(f"<vcpu placement='static'>{count}</vcpu>")
+    input("press Enter to start edit xml file:")
+    sh(f'virsh edit {vm}')
 
 def gpu(vm=None, devices=None):
     if not vm:
