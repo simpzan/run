@@ -186,8 +186,9 @@ def fork(base, *vms):
         print(f'Warn: the disk of the vm is derived disk!\n{base}: {base_hdd}\n{backing_file}')
     for vm in vms: _fork_one_vm(base, base_hdd, vm)
 
-def rm(*vms):
-    for vm in vms: sh(f'virsh undefine {vm}')
+def rm(*vms, **kwargs):
+    options = '--remove-all-storage' if '--rs' in kwargs else ''
+    for vm in vms: sh(f'virsh undefine {options} {vm}')
 
 def start(*vms):
     for vm in vms: sh(f'virsh start {vm}')
