@@ -130,6 +130,23 @@ def scp(src, dst):
     cmd = f'sshpass -p amd1234 scp -r {src} {dst}'
     sh(cmd)
 
+def install():
+    cmd = f'apt install guestfs-tools sshpass'
+
+def _get_hdd(vm):
+    out = sh_out(f'virsh domblklist {vm} | grep -E "vda|hda"')
+    hdd = out.strip().split(' ')[-1]
+    return hdd
+
+def fork(base, vm):
+    base_hdd = _get_hdd(base)
+    import os.path
+    new_hdd = os.path.dirname(base_hdd) + vm + '.qcow2'
+    cmd = f'''qemu-img create -f qcow2 -F qcow2 -b {base_hdd} "{new_hdd}" &&
+        virt-clone --original "{base}" --name "{vm}" --file "{new_hdd}" --preserve-data &&
+        virt-sysprep -d {vm} --operation machine-id'''
+    sh(cmd)
+
 def start(vm):
     sh(f'virsh start {vm}')
 
