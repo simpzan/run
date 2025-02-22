@@ -199,6 +199,16 @@ def stop(*vms):
     for vm in vms:
         if vms_info[vm]: sh(f'virsh destroy {vm}')
 
+def _parse_kwargs(all_args):
+    kwargs = {}
+    args = []
+    for arg in all_args:
+        if not arg.startswith('--'): args.append(arg)
+        elif not '=' in arg: kwargs[arg] = ''
+        else:
+            key, value = arg.split('=')
+            kwargs[key] = value
+    return args, kwargs
 def _main():
     if len(sys.argv) < 2:
         for sym, obj in globals().items():
@@ -206,5 +216,7 @@ def _main():
         return
     _, name, *args = sys.argv
     sym = globals()[name]
-    if callable(sym): sym(*args)
+    if callable(sym):
+        args, kwargs = _parse_kwargs(args)
+        sym(*args, **kwargs)
 if __name__ == "__main__": _main()
