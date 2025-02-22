@@ -29,19 +29,14 @@ def _get_vm_list():
 
 def vm_info(vm):
     vms = _get_vm_list()
-    running = vms[vm]
-    pci = _get_pci_devices(vm)
-    cpu_core = _get_cpu_count(vm)
-    memory = _get_memory(vm)
-    ip = _get_ip_of_vm(vm)
     hdd = _get_hdd(vm)
     print(f'''
 Name: {vm}
-Running: {running}
-CPU cores: {cpu_core:<{3}}
-System Memory: {memory:.1f}
-PCI: {pci}
-IP: {ip}
+Running: {vms[vm]}
+CPU cores: {_get_cpu_count(vm)}
+System Memory: {_get_memory(vm)}
+PCI: {_get_pci_devices(vm)}
+IP: {_get_ip_of_vm(vm)}
 HDD: {hdd}
 '''.strip())
     sh(f'qemu-img info {hdd} | grep -E "backing file:|virtual size|disk size"')
@@ -58,8 +53,7 @@ def info(vm=None):
 
 def mem(vm=None, size=None):
     if not vm:
-        sh('free -h')
-        return
+        return sh('free -h')
     size = int(size) * 1024 * 1024
     print(f"<memory unit='KiB'>{size}</memory><currentMemory unit='KiB'>{size}</currentMemory>")
     input("press Enter to start edit xml file:")
@@ -67,18 +61,15 @@ def mem(vm=None, size=None):
 
 def cpu(vm=None, count=None):
     if not vm:
-        sh('lscpu | grep -E "^CPU\(s\):|NUMA node"')
-        return
+        return sh('lscpu | grep -E "^CPU\(s\):|NUMA node"')
     sh(f'virt-xml {vm}  --edit --vcpus {count}')
 
 def gpu(vm=None, devices=None):
     if not vm:
-        sh('lspci | grep -E "acc|Display"')
-        return
+        return sh('lspci | grep -E "acc|Display"')
     cmd = f'virt-xml {vm} --remove-device --host-dev all\n'
     suffix = [f'--host-dev {dev}' for dev in devices.split(',')]
     cmd += f'virt-xml {vm} --add-device ' + ' '.join(suffix)
-    print(cmd)
     sh(cmd)
 
 def _get_cpu_count(vm):
@@ -90,8 +81,7 @@ def _get_memory(vm):
     cmd = f'virsh dumpxml "{vm}"'
     xml_string = sh_out(cmd).strip()
     el = ET.fromstring(xml_string).find('.//currentMemory')
-    out = int(el.text) / 1024 / 1024
-    return out
+    return int(el.text) / 1024 / 1024
 
 def ls():
     vms = _get_vm_list()
@@ -119,8 +109,7 @@ def _get_ip_of_vm(vm):
     line = sh_out(cmd).strip().split('\n')[-1]
     if not 'ipv4' in line: return
     ip_full = line.split(' ')[-1]
-    ip = ip_full.split('/')[0]
-    return ip
+    return ip_full.split('/')[0]
 
 def _wait_host(ip):
     sh(f'until nc -vzw 2 "{ip}" 22; do sleep 2; done')
@@ -152,16 +141,14 @@ def _change_name_to_ip(filepath):
 def scp(src, dst):
     src = _change_name_to_ip(src)
     dst = _change_name_to_ip(dst)
-    cmd = f'sshpass -p amd1234 scp -r {src} {dst}'
-    sh(cmd)
+    sh(f'sshpass -p amd1234 scp -r {src} {dst}')
 
 def install():
     cmd = f'apt install guestfs-tools sshpass'
 
 def _get_hdd(vm):
     out = sh_out(f'virsh domblklist {vm} | grep -E "vda|hda"')
-    hdd = out.strip().split(' ')[-1]
-    return hdd
+    return out.strip().split(' ')[-1]
 
 def _fork_one_vm(base, base_hdd, vm):
     new_hdd = f'{os.path.dirname(base_hdd)}/{vm}.qcow2'
