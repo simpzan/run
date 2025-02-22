@@ -41,13 +41,21 @@ def _get_cpu_count(vm):
     out = out.strip().split(' ')[-1]
     return int(out)
 
+def _get_memory(vm):
+    cmd = f'virsh dumpxml "{vm}"'
+    xml_string = sh_out(cmd).strip()
+    el = ET.fromstring(xml_string).find('.//currentMemory')
+    out = int(el.text) / 1024 / 1024
+    return out
+
 def ls():
     vms = _get_vm_list()
     for name in vms:
         running = vms[name]
         pci = _get_pci_devices(name)
         cpu = _get_cpu_count(name)
-        print(f'{name:<{40}}\t {running}\t {cpu:{3}}\t {pci}')
+        mem = _get_memory(name)
+        print(f'{name:<{40}}\t {running}\t{cpu:<{3}}  {mem:.1f}  {pci}')
 
 def _get_pci_devices(vm):
     cmd = f'virsh dumpxml "{vm}"'
