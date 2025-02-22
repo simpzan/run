@@ -146,8 +146,40 @@ def scp(src, dst):
     dst = _change_name_to_ip(dst)
     sh(f'sshpass -p amd1234 scp -r {src} {dst}')
 
+def _write_text_file(text, file, mode='w'):
+    file = os.path.expanduser(file)
+    with open(file, mode) as file:
+        file.write(text)
+
+_bash_script = r'''
+vm() { python3 -m vmc "$@"; }
+_vm_completion_complete() {
+  local prefix=${COMP_WORDS[$COMP_CWORD]}
+  local list
+  if [[ "${COMP_CWORD}" == "1" ]]; then
+    list="$(python3 -m vmc)"
+  else
+    list="$(python3 -m vmc ls --quiet)"
+  fi
+  COMPREPLY=($(compgen -W "$list" "$prefix"))
+}
+complete -F _vm_completion_complete vm vmc.py
+'''
 def install():
-    cmd = f'apt install guestfs-tools sshpass'
+    sh(f'apt install -y guestfs-tools sshpass')
+
+    site_packages_dir = sys.path[-1]
+    current_file_path = os.path.abspath(__file__)
+    sh(f'''set -x; sudo cp {current_file_path} {site_packages_dir}''')
+
+    bash_file = '~/.vm.bash'
+    _write_text_file(_bash_script.lstrip(), bash_file)
+
+    load_script = f'[[ $PS1 && -f {bash_file} ]] && source {bash_file}\n'
+    _write_text_file(load_script, '~/.bashrc', 'a')
+    print(f'installed {bash_file}, restart shell session to use it.')
+
+    print('installed `vm` command')
 
 def _get_hdd(vm):
     out = sh_out(f'virsh domblklist {vm} | grep -E "vda|hda"')
