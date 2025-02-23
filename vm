@@ -170,24 +170,14 @@ def _complete(*_):
     if words[1] == 'gpu' and len(words) > 3:
         return _print_list(_get_gpus(), word1)
     _print_list(_get_vm_list(), word1)
-_bash_script = r'''
-complete -C "vm _complete" vm
-'''
 def install():
-    _sh(f'apt install -y guestfs-tools sshpass')
-
-    site_packages_dir = sys.path[-1]
-    current_file_path = os.path.abspath(__file__)
-    _sh(f'''set -x; sudo cp {current_file_path} {site_packages_dir}''')
-
-    bash_file = '~/.vm.bash'
-    _write_text_file(_bash_script.lstrip(), bash_file)
-
-    load_script = f'[[ $PS1 && -f {bash_file} ]] && source {bash_file}\n'
-    _write_text_file(load_script, '~/.bashrc', 'a')
-    print(f'installed {bash_file}, restart shell session to use it.')
-
-    print('installed `vm` command')
+    _sh(f'''
+        set -x;
+        sudo apt install -y guestfs-tools sshpass;
+        sudo cp {os.path.abspath(__file__)} /usr/local/bin/vm;
+        echo '[[ $PS1 ]] && complete -C "vm _complete" vm' >> ~/.bashrc
+    ''')
+    print(f'installed `vm` command, restart shell session to use it.')
 
 def _get_hdd(vm):
     out = _sh_out(f'virsh domblklist {vm} | grep -E "vda|hda"')
