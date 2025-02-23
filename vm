@@ -173,8 +173,9 @@ def install():
     _sh(f'''
         set -x;
         sudo apt install -y guestfs-tools sshpass;
-        sudo cp {os.path.abspath(__file__)} /usr/local/bin/vm;
-        echo '[[ $PS1 ]] && complete -C "vm _complete" vm' >> ~/.bashrc
+        sudo cp {os.path.abspath(__file__)} /usr/bin/vm;
+        sudo chmod a+x /usr/bin/vm;
+        echo 'complete -C "vm _complete" vm' | tee -a ~/.bashrc
     ''')
     print(f'installed `vm` command, restart shell session to use it.')
 
