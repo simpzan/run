@@ -171,8 +171,7 @@ def _complete(*_):
         return _print_list(_get_gpus(), word1)
     _print_list(_get_vm_list(), word1)
 _bash_script = r'''
-vm() { python3 -m vmc "$@"; }
-complete -C "python3 -m vmc _complete" vm vmc.py
+complete -C "vm _complete" vm
 '''
 def install():
     _sh(f'apt install -y guestfs-tools sshpass')
