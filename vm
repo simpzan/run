@@ -96,6 +96,7 @@ def ls(**kwargs):
             mem =  _get_memory(name)
         ip = _get_ip_of_vm(name) or '-'
         print(f'{name:<{name_len_max}}\t {running:5} {cpu:>4} {mem:6.1f} {ip:>16}  {pci}')
+cmd_list = ls
 
 def _get_pci_devices(vm):
     texts = _sh_out(f'virsh dumpxml "{vm}"').strip()
@@ -228,8 +229,9 @@ def _get_local_functions():
 def _main():
     if len(sys.argv) < 2: return _print_list(_get_local_functions())
     _, name, *args = sys.argv
-    sym = globals()[name]
-    if callable(sym):
-        args, kwargs = _parse_kwargs(args)
-        sym(*args, **kwargs)
+    syms = globals()
+    sym = syms.get(name) or syms.get('cmd_' + name)
+    if not callable(sym): return print(f'Error: invalid function: {name}')
+    args, kwargs = _parse_kwargs(args)
+    sym(*args, **kwargs)
 if __name__ == "__main__": _main()
