@@ -159,11 +159,13 @@ def _get_gpus():
 def _print_list(words, prefix=''):
     for word in words:
         if word.startswith(prefix): print(word)
-def _complete(*args):
+def _complete(*_):
+    COMP_POINT = int(os.environ['COMP_POINT'])
     COMP_LINE = os.environ['COMP_LINE']
-    words = [word for word in COMP_LINE.split(' ') if len(word) > 0]
-    word1 = args[1]
-    if len(word1) == 0: words.append('')
+    line_prefix = COMP_LINE[:COMP_POINT]
+    words = [word for word in line_prefix.split(' ') if len(word) > 0]
+    if line_prefix[-1] == ' ': words.append('')
+    word1 = words[-1]
     if len(words) == 2: return _print_list(_get_local_functions(), word1)
     if words[1] == 'gpu' and len(words) > 3:
         return _print_list(_get_gpus(), word1)
