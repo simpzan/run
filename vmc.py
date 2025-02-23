@@ -128,6 +128,7 @@ def ssh(vm, command=None):
     cmd = f'sshpass -p amd1234 ssh -o StrictHostKeyChecking=no root@{ip}'
     if command: cmd += f' -t "{command}"'
     _sh(cmd)
+sh = ssh
 
 def run(vm, cmd=None):
     vms = _get_vm_list()
@@ -144,6 +145,7 @@ def scp(src, dst):
     src = _change_name_to_ip(src)
     dst = _change_name_to_ip(dst)
     _sh(f'sshpass -p amd1234 scp -r {src} {dst}')
+cp = scp
 
 def _write_text_file(text, file, mode='w'):
     file = os.path.expanduser(file)
