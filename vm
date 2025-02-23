@@ -147,11 +147,6 @@ def scp(src, dst):
     _sh(f'sshpass -p amd1234 scp -r {src} {dst}')
 cp = scp
 
-def _write_text_file(text, file, mode='w'):
-    file = os.path.expanduser(file)
-    with open(file, mode) as file:
-        file.write(text)
-
 def _get_gpus():
     texts = _sh_out('lspci | grep -E "acc|Display"')
     out = [line.split(' ')[0] for line in texts.strip().split('\n')]
