@@ -84,7 +84,7 @@ def _get_memory(vm):
 
 def ls(**kwargs):
     vms = _get_vm_list()
-    verbose = '--v' in kwargs
+    verbose = '-v' in kwargs
     name_len_max = max([len(name) for name in vms])
     print(f'{"NAME":<{name_len_max}}\t STATE\tCPU {"MEM":>6} {"IP":>16}  PCI')
     for name in vms:
@@ -217,7 +217,7 @@ def _parse_kwargs(all_args):
     kwargs = {}
     args = []
     for arg in all_args:
-        if not arg.startswith('--'): args.append(arg)
+        if not arg.startswith('-'): args.append(arg)
         elif not '=' in arg: kwargs[arg] = ''
         else:
             key, value = arg.split('=')
