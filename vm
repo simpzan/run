@@ -130,16 +130,18 @@ def _wait_host(ip):
     while _sh(f'nc -zw 1 {ip} 22 >/dev/null 2>&1').returncode:
         log.print(f'sshd not ready on {ip}, try again later')
     log.done()
-
-def ssh(vm, command=None):
-    vms = _get_vm_list()
-    if not vms[vm]: return print(f'Error: vm {vm} not running')
+def _wait_vm_ip(vm):
     log = DynamicLog(2)
     while True:
         ip = _get_ip_of_vm(vm)
         if ip: break
         log.print(f'ip not found for {vm}, try again later')
     log.done()
+    return ip
+def ssh(vm, command=None):
+    vms = _get_vm_list()
+    if not vms[vm]: return print(f'Error: vm {vm} not running')
+    ip = _wait_vm_ip(vm)
     _wait_host(ip)
     cmd = f'sshpass -p amd1234 ssh -o StrictHostKeyChecking=no root@{ip}'
     if command: cmd += f' -t "{command}"'
