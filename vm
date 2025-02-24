@@ -209,7 +209,7 @@ up = start
 
 def stop(*vms, **kwargs):
     vms_info = _get_vm_list()
-    if '--all' in kwargs: vms = vms_info.keys()
+    if '-a' in kwargs: vms = vms_info.keys()
     for vm in vms:
         if vms_info[vm]: _sh(f'virsh destroy {vm}')
 down = stop
