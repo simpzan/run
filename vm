@@ -120,7 +120,7 @@ def _wait_host(ip):
     start = time.time()
     while _sh(f'nc -zw 1 {ip} 22 >/dev/null 2>&1').returncode:
         diff = int(time.time() - start)
-        print(f'sshd not ready on {ip}, try again later, {diff}s', end='\r')
+        print(f'\rsshd not ready on {ip}, try again later, {diff}s...', end='')
         time.sleep(2)
     print()
 
@@ -132,7 +132,7 @@ def ssh(vm, command=None):
         ip = _get_ip_of_vm(vm)
         if ip: break
         diff = int(time.time() - start)
-        print(f'ip not found, try again later, {diff}s', end='\r')
+        print(f'\rip not found, try again later, {diff}s...', end='')
         time.sleep(2)
     print()
     _wait_host(ip)
