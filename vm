@@ -45,12 +45,9 @@ HDD: {hdd}
 
 def info(vm=None):
     if vm: return _vm_info(vm)
-    print('\n---------------- CPU ----------------')
-    cpu()
-    print('\n---------------- MEM ----------------')
-    mem()
-    print('\n---------------- GPU ----------------')
-    gpu()
+    print('\n---------------- CPU ----------------'); cpu()
+    print('\n---------------- MEM ----------------'); mem()
+    print('\n---------------- GPU ----------------'); gpu()
     print('')
 
 def mem(vm=None, size=None):
@@ -81,8 +78,7 @@ def ls(**kwargs):
     for name in vms:
         running = vms[name]
         pci, cpu, mem = [], 0, 0
-        if verbose:
-            pci, mem, cpu = _get_vm_config(name)
+        if verbose: pci, mem, cpu = _get_vm_config(name)
         ip = _get_ip_of_vm(name) or '-'
         print(f'{name:<{name_len_max}}\t {running:5} {cpu:>4} {mem:6.1f} {ip:>16}  {pci}')
 cmd_list = ls
@@ -149,7 +145,6 @@ def _change_name_to_ip(filepath):
     vm, file = filepath.split(':')
     ip = _get_ip_of_vm(vm)
     return f'root@{ip}:{file}'
-
 def scp(src, dst):
     src = _change_name_to_ip(src)
     dst = _change_name_to_ip(dst)
@@ -178,13 +173,11 @@ def _complete(*_):
     if words[1] in ['start', 'up']: state = False
     _print_list(_get_vm_list(state), word1)
 def install():
-    _sh(f'''
-        set -x;
+    _sh(f'''set -x;
         sudo apt install -y guestfs-tools sshpass;
         sudo cp {os.path.abspath(__file__)} /usr/bin/vm;
         sudo chmod a+x /usr/bin/vm;
-        echo 'complete -C "vm _complete" vm' | tee -a ~/.bashrc
-    ''')
+        echo 'complete -C "vm _complete" vm' | tee -a ~/.bashrc''')
     print(f'installed `vm` command, restart shell session to use it.')
 
 def _get_hdd(vm):
@@ -193,10 +186,9 @@ def _get_hdd(vm):
 
 def _fork_one_vm(base, base_hdd, vm):
     new_hdd = f'{os.path.dirname(base_hdd)}/{vm}.qcow2'
-    cmd = f'''qemu-img create -f qcow2 -F qcow2 -b {base_hdd} "{new_hdd}" &&
+    _sh(f'''qemu-img create -f qcow2 -F qcow2 -b {base_hdd} "{new_hdd}" &&
         virt-clone --original "{base}" --name "{vm}" --file "{new_hdd}" --preserve-data &&
-        virt-sysprep -d {vm} --operation machine-id'''
-    _sh(cmd)
+        virt-sysprep -d {vm} --operation machine-id''')
 def fork(base, *vms):
     base_hdd = _get_hdd(base)
     backing_file = _sh_out(f'qemu-img info {base_hdd} | grep -E "backing file:"').strip()
