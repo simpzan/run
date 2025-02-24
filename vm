@@ -117,7 +117,12 @@ def _get_ip_of_vm(vm):
     return ip_full.split('/')[0]
 
 def _wait_host(ip):
-    _sh(f'until nc -vzw 2 "{ip}" 22; do sleep 2; done')
+    start = time.time()
+    while _sh(f'nc -zw 1 {ip} 22 >/dev/null 2>&1').returncode:
+        diff = int(time.time() - start)
+        print(f'sshd not ready on {ip}, try again later, {diff}s', end='\r')
+        time.sleep(2)
+    print()
 
 def ssh(vm, command=None):
     vms = _get_vm_list()
