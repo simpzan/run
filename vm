@@ -60,7 +60,7 @@ def mem(vm=None, size=None):
     _sh(f'virsh edit {vm}')
 
 def cpu(vm=None, count=None):
-    if not vm: return _sh('lscpu | grep -E "^CPU\(s\):|NUMA node"')
+    if not vm: return _sh(r'lscpu | grep -E "^CPU\(s\):|NUMA node"')
     _sh(f'virt-xml {vm}  --edit --vcpus {count}')
 
 def gpu(vm=None, *devices):
@@ -153,7 +153,7 @@ cp = scp
 def _get_gpus():
     texts = _sh_out('lspci | grep -E "acc|Display"')
     out = [line.split(' ')[0] for line in texts.strip().split('\n')]
-    return [bdf.replace(":", "\:") for bdf in out]
+    return [bdf.replace(":", r"\:") for bdf in out]
 def _print_list(words, prefix=''):
     for word in words:
         if word.startswith(prefix): print(word)
