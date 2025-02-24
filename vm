@@ -31,12 +31,13 @@ def _get_vm_list(state=None):
 def _vm_info(vm):
     vms = _get_vm_list()
     hdd = _get_hdd(vm)
+    pci, mem, cpu = _get_vm_config(vm)
     print(f'''
 Name: {vm}
 Running: {vms[vm]}
-CPU cores: {_get_cpu_count(vm)}
-System Memory: {_get_memory(vm)}
-PCI: {_get_pci_devices(vm)}
+CPU cores: {cpu}
+System Memory: {mem}
+PCI: {pci}
 IP: {_get_ip_of_vm(vm)}
 HDD: {hdd}
 '''.strip())
@@ -71,17 +72,6 @@ def gpu(vm=None, *devices):
         cmd += f'virt-xml {vm} --add-device ' + ' '.join(suffix)
     _sh(cmd)
 
-def _get_cpu_count(vm):
-    out = _sh_out(f'virsh vcpucount {vm} | grep current | grep config')
-    out = out.strip().split(' ')[-1]
-    return int(out)
-
-def _get_memory(vm):
-    cmd = f'virsh dumpxml "{vm}"'
-    xml_string = _sh_out(cmd).strip()
-    el = ET.fromstring(xml_string).find('.//currentMemory')
-    return int(el.text) / 1024 / 1024
-
 def ls(**kwargs):
     vms = _get_vm_list()
     if not vms: return
@@ -92,22 +82,23 @@ def ls(**kwargs):
         running = vms[name]
         pci, cpu, mem = [], 0, 0
         if verbose:
-            pci = _get_pci_devices(name)
-            cpu = _get_cpu_count(name)
-            mem =  _get_memory(name)
+            pci, mem, cpu = _get_vm_config(name)
         ip = _get_ip_of_vm(name) or '-'
         print(f'{name:<{name_len_max}}\t {running:5} {cpu:>4} {mem:6.1f} {ip:>16}  {pci}')
 cmd_list = ls
 
-def _get_pci_devices(vm):
+def _get_vm_config(vm):
     texts = _sh_out(f'virsh dumpxml "{vm}"').strip()
-    out = []
-    for element in ET.fromstring(texts).findall(".//devices/hostdev/source/address"):
+    et = ET.fromstring(texts)
+    pci = []
+    for element in et.findall(".//devices/hostdev/source/address"):
         keys = ['domain', 'bus', 'slot', 'function']
         domain, bus, device, function = [element.attrib[key][2:] for key in keys]
         bdf = f'{domain}:{bus}:{device}.{function}'
-        out.append(bdf)
-    return out
+        pci.append(bdf)
+    mem = int(et.find('.//currentMemory').text) / 1024 / 1024
+    cpu = int(et.find('.//vcpu').text)
+    return pci, mem, cpu
 
 def _get_ip_of_vm(vm):
     cmd = f'virsh domifaddr {vm}'
