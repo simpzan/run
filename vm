@@ -5,6 +5,8 @@ import subprocess
 import time
 import xml.etree.ElementTree as ET
 
+os.environ['VIRSH_DEFAULT_CONNECT_URI'] = 'qemu:///system'
+
 def _sh(cmds, wait=None, pipe=False):
     stdout = subprocess.PIPE if pipe else None
     process = subprocess.Popen(cmds, shell=True, text=True, stdout=stdout, stderr=stdout)
@@ -174,6 +176,7 @@ def _complete(*_):
     _print_list(_get_vm_list(state), word1)
 def install():
     _sh(f'''set -x;
+        sudo usermod -a -G libvirt $USER
         sudo apt install -y guestfs-tools sshpass;
         sudo cp {os.path.abspath(__file__)} /usr/bin/vm;
         sudo chmod a+x /usr/bin/vm;
