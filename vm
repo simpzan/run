@@ -55,7 +55,79 @@ class CliBackend:
         out = _sh_out(f'virsh domblklist {vm} | grep -E "vda|hda"')
         return out.strip().split(' ')[-1]
 
-backend = CliBackend()
+class ApiBackend:
+    """Implementation using libvirt API"""
+
+    def __init__(self):
+        self._conn = None
+
+    def _get_conn(self):
+        """Get cached libvirt connection"""
+        if self._conn is None:
+            import libvirt
+            self._conn = libvirt.open('qemu:///system')
+            if self._conn is None:
+                raise Exception('Failed to connect to QEMU/KVM')
+        return self._conn
+
+    def _get_vm_list(self, state=None):
+        conn = self._get_conn()
+        vms = {}
+        for dom_id in conn.listDomainsID():
+            domain = conn.lookupByID(dom_id)
+            vms[domain.name()] = True
+        for name in conn.listDefinedDomains(): vms[name] = False
+        if state is not None:
+            vms = {name: running for name, running in vms.items() if running == state}
+        return vms
+
+    def _get_ip_of_vm(self, vm):
+        conn = self._get_conn()
+        domain = conn.lookupByName(vm)
+        if domain is None: return None
+
+        xml_root = ET.fromstring(domain.XMLDesc(0))
+        macs = [interface.get('address') for interface in xml_root.findall(".//interface/mac")]
+        if not macs: return None
+
+        for net_name in conn.listNetworks():
+            net = conn.networkLookupByName(net_name)
+            for lease in net.DHCPLeases():
+                if lease['mac'] in macs: return lease['ipaddr']
+        return None
+
+    def _get_vm_config(self, vm):
+        conn = self._get_conn()
+        domain = conn.lookupByName(vm)
+        if domain is None: return [], 0, 0
+
+        xml_root = ET.fromstring(domain.XMLDesc(0))
+
+        pci = []
+        for element in xml_root.findall(".//devices/hostdev/source/address"):
+            keys = ['domain', 'bus', 'slot', 'function']
+            domain, bus, device, function = [element.attrib[key][2:] for key in keys]
+            bdf = f'{domain}:{bus}:{device}.{function}'
+            pci.append(bdf)
+
+        mem = int(xml_root.find('.//currentMemory').text) / 1024 / 1024
+        cpu = int(xml_root.find('.//vcpu').text)
+        return pci, mem, cpu
+
+    def _get_hdd(self, vm):
+        conn = self._get_conn()
+        domain = conn.lookupByName(vm)
+        if domain is None: return None
+
+        xml_root = ET.fromstring(domain.XMLDesc(0))
+        for disk in xml_root.findall(".//devices/disk"):
+            target = disk.find("target")
+            if target is not None and target.get("dev") in ["vda", "hda"]:
+                source = disk.find("source")
+                if source is not None: return source.get("file")
+        return None
+
+backend = ApiBackend()
 
 def _vm_info(vm):
     vms = backend._get_vm_list()
