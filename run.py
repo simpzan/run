@@ -72,7 +72,7 @@ def generate_script():
     print(f'{file} created!')
 
 _bash_script = r'''
-run() {
+run_py() {
   if [[ -z "$@" ]]; then
     if [[ -f ./Runfile.py ]]; then
       python3 -m run list_functions
@@ -97,7 +97,7 @@ _run_completion_install() {
     ! which compinit >/dev/null && autoload -Uz compinit && compinit
     ! which bashcompinit >/dev/null && autoload -Uz bashcompinit && bashcompinit
   fi
-  complete -F _run_completion_complete run Runfile.py
+  complete -F _run_completion_complete run_py Runfile.py
 }
 _run_completion_install
 '''
