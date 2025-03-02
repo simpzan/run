@@ -57,7 +57,7 @@ _run_file_append_if() {
 }
 _run_install() {
   local selfPath=$0
-  local file=.run.rc
+  local file=.run.sh
   cp $selfPath ~/$file
   local cmd="[[ -f ~/$file ]] && source ~/$file"
   _run_file_append_if ~/.bashrc "$cmd"
