@@ -79,9 +79,10 @@ def ls(**kwargs):
     print(f'{"NAME":<{name_len_max}}\t STATE\tCPU {"MEM":>6} {"IP":>16}  PCI')
     for name in vms:
         running = vms[name]
-        pci, cpu, mem = [], 0, 0
-        if verbose: pci, mem, cpu = _get_vm_config(name)
-        ip = _get_ip_of_vm(name) or '-'
+        pci, cpu, mem, ip = [], 0, 0, ''
+        if verbose:
+            pci, mem, cpu = _get_vm_config(name)
+            ip = _get_ip_of_vm(name) or '-'
         print(f'{name:<{name_len_max}}\t {running:5} {cpu:>4} {mem:6.1f} {ip:>16}  {pci}')
 cmd_list = ls
 
