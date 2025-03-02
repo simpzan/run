@@ -20,6 +20,7 @@ def _sh_out(cmds):
 class CliBackend:
     def __init__(self):
         os.environ['VIRSH_DEFAULT_CONNECT_URI'] = 'qemu:///system'
+        self.fast_mode = False
 
     def _get_vm_list(self, state=None):
         texts = _sh_out(f'virsh list --all')
@@ -60,6 +61,7 @@ class ApiBackend:
 
     def __init__(self):
         self._conn = None
+        self.fast_mode = True
 
     def _get_conn(self):
         """Get cached libvirt connection"""
@@ -173,7 +175,7 @@ def gpu(vm=None, *devices):
 def ls(**kwargs):
     vms = backend._get_vm_list()
     if not vms: return
-    verbose = '-v' in kwargs
+    verbose = backend.fast_mode or '-v' in kwargs
     name_len_max = max([len(name) for name in vms])
     print(f'{"NAME":<{name_len_max}}\t STATE\tCPU {"MEM":>6} {"IP":>16}  PCI')
     for name in vms:
