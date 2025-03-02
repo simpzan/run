@@ -5,8 +5,6 @@ import subprocess
 import time
 import xml.etree.ElementTree as ET
 
-os.environ['VIRSH_DEFAULT_CONNECT_URI'] = 'qemu:///system'
-
 def _sh(cmds, wait=None, pipe=False):
     stdout = subprocess.PIPE if pipe else None
     process = subprocess.Popen(cmds, shell=True, universal_newlines=True, stdout=stdout, stderr=stdout)
@@ -19,16 +17,53 @@ def _sh(cmds, wait=None, pipe=False):
 def _sh_out(cmds):
     return _sh(cmds, pipe=True).stdout
 
+class CliBackend:
+    def __init__(self):
+        os.environ['VIRSH_DEFAULT_CONNECT_URI'] = 'qemu:///system'
+
+    def _get_vm_list(self, state=None):
+        texts = _sh_out(f'virsh list --all')
+        lines = texts.strip().split('\n')[2:]
+        vms = {}
+        for line in lines:
+            info = line.split(' ')
+            _, name, stateStr, *_ = [e for e in info if len(e) > 0]
+            running = stateStr == 'running'
+            if state is None or state == running: vms[name] = running
+        return vms
+
+    def _get_vm_config(self, vm):
+        texts = _sh_out(f'virsh dumpxml "{vm}"').strip()
+        et = ET.fromstring(texts)
+        pci = []
+        for element in et.findall(".//devices/hostdev/source/address"):
+            keys = ['domain', 'bus', 'slot', 'function']
+            domain, bus, device, function = [element.attrib[key][2:] for key in keys]
+            bdf = f'{domain}:{bus}:{device}.{function}'
+            pci.append(bdf)
+        mem = int(et.find('.//currentMemory').text) / 1024 / 1024
+        cpu = int(et.find('.//vcpu').text)
+        return pci, mem, cpu
+
+    def _get_ip_of_vm(self, vm):
+        cmd = f'virsh domifaddr {vm}'
+        line = _sh_out(cmd).strip().split('\n')[-1]
+        if not 'ipv4' in line: return
+        ip_full = line.split(' ')[-1]
+        return ip_full.split('/')[0]
+    def _get_hdd(self, vm):
+        out = _sh_out(f'virsh domblklist {vm} | grep -E "vda|hda"')
+        return out.strip().split(' ')[-1]
+
+backend = CliBackend()
 def _get_vm_list(state=None):
-    texts = _sh_out(f'virsh list --all')
-    lines = texts.strip().split('\n')[2:]
-    vms = {}
-    for line in lines:
-        info = line.split(' ')
-        _, name, stateStr, *_ = [e for e in info if len(e) > 0]
-        running = stateStr == 'running'
-        if state is None or state == running: vms[name] = running
-    return vms
+    return backend._get_vm_list(state)
+def _get_vm_config(vm):
+    return backend._get_vm_config(vm)
+def _get_ip_of_vm(vm):
+    return backend._get_ip_of_vm(vm)
+def _get_hdd(vm):
+    return backend._get_hdd(vm)
 
 def _vm_info(vm):
     vms = _get_vm_list()
@@ -86,25 +121,6 @@ def ls(**kwargs):
         print(f'{name:<{name_len_max}}\t {running:5} {cpu:>4} {mem:6.1f} {ip:>16}  {pci}')
 cmd_list = ls
 
-def _get_vm_config(vm):
-    texts = _sh_out(f'virsh dumpxml "{vm}"').strip()
-    et = ET.fromstring(texts)
-    pci = []
-    for element in et.findall(".//devices/hostdev/source/address"):
-        keys = ['domain', 'bus', 'slot', 'function']
-        domain, bus, device, function = [element.attrib[key][2:] for key in keys]
-        bdf = f'{domain}:{bus}:{device}.{function}'
-        pci.append(bdf)
-    mem = int(et.find('.//currentMemory').text) / 1024 / 1024
-    cpu = int(et.find('.//vcpu').text)
-    return pci, mem, cpu
-
-def _get_ip_of_vm(vm):
-    cmd = f'virsh domifaddr {vm}'
-    line = _sh_out(cmd).strip().split('\n')[-1]
-    if not 'ipv4' in line: return
-    ip_full = line.split(' ')[-1]
-    return ip_full.split('/')[0]
 
 class DynamicLog:
     def __init__(self, sleep=1):
@@ -183,10 +199,6 @@ def install():
         sudo chmod a+x /usr/bin/vm;
         echo 'complete -C "vm _complete" vm' | tee -a ~/.bashrc''')
     print(f'installed `vm` command, restart shell session to use it.')
-
-def _get_hdd(vm):
-    out = _sh_out(f'virsh domblklist {vm} | grep -E "vda|hda"')
-    return out.strip().split(' ')[-1]
 
 def _fork_one_vm(base, base_hdd, vm):
     new_hdd = f'{os.path.dirname(base_hdd)}/{vm}.qcow2'
