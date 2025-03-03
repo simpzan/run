@@ -5,6 +5,8 @@ import subprocess
 import time
 import xml.etree.ElementTree as ET
 
+os.environ['VIRSH_DEFAULT_CONNECT_URI'] = 'qemu:///system'
+
 def _sh(cmds, wait=None, pipe=False):
     stdout = subprocess.PIPE if pipe else None
     process = subprocess.Popen(cmds, shell=True, universal_newlines=True, stdout=stdout, stderr=stdout)
@@ -19,7 +21,6 @@ def _sh_out(cmds):
 
 class CliBackend:
     def __init__(self):
-        os.environ['VIRSH_DEFAULT_CONNECT_URI'] = 'qemu:///system'
         self.fast_mode = False
 
     def _get_vm_list(self, state=None):
