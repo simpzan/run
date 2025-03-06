@@ -218,13 +218,13 @@ def ssh(vm, command=None):
     _wait_host(ip)
     cmd = f'sshpass -p amd1234 ssh -o StrictHostKeyChecking=no root@{ip}'
     if command: cmd += f' -t "{command}"'
-    _sh(cmd)
+    return _sh(cmd).returncode
 sh = ssh
 
 def run(vm, cmd=None):
     vms = backend._get_vm_list()
     if not vms[vm]: start(vm)
-    ssh(vm, cmd)
+    return ssh(vm, cmd)
 
 def _change_name_to_ip(filepath):
     if ':' not in filepath: return filepath
@@ -315,5 +315,6 @@ def _main():
     sym = syms.get(name) or syms.get('cmd_' + name)
     if not callable(sym): return print(f'Error: invalid function: {name}')
     args, kwargs = _parse_kwargs(args)
-    sym(*args, **kwargs)
+    code = sym(*args, **kwargs)
+    sys.exit(code)
 if __name__ == "__main__": _main()
