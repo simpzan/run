@@ -193,11 +193,14 @@ class DynamicLog:
     def __init__(self, sleep=1):
         self.start = time.time()
         self.sleep = sleep
+        self.newline = False
     def print(self, msg, *args, **kwargs):
         diff = int(time.time() - self.start)
         print(f'\r{msg}, {diff}s...', end='')
+        self.newline = True
         time.sleep(self.sleep)
-    def done(self): print()
+    def done(self):
+        if self.newline: print()
 def _wait_host(ip):
     log = DynamicLog()
     while _sh(f'nc -zw 1 {ip} 22 >/dev/null 2>&1').returncode:
