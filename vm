@@ -321,5 +321,5 @@ def _main():
     if not callable(sym): return print(f'Error: invalid function: {name}')
     args, kwargs = _parse_kwargs(args)
     code = sym(*args, **kwargs)
-    sys.exit(code)
+    if isinstance(code, int): sys.exit(code)
 if __name__ == "__main__": _main()
