@@ -127,7 +127,7 @@ class ApiBackend:
                 if source is not None: return source.get("file")
         return None
 
-backend = ApiBackend()
+backend = CliBackend() if os.environ.get('VMBK') == 'cli' else ApiBackend()
 
 def _vm_info(vm):
     vms = backend.get_vm_list()
