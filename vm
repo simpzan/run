@@ -75,14 +75,11 @@ class ApiBackend:
 
     def _get_vm_list(self, state=None):
         conn = self._get_conn()
-        vms = {}
-        for dom_id in conn.listDomainsID():
-            domain = conn.lookupByID(dom_id)
-            vms[domain.name()] = True
-        for name in conn.listDefinedDomains(): vms[name] = False
-        if state is not None:
-            vms = {name: running for name, running in vms.items() if running == state}
-        return vms
+        return {
+            domain.name(): domain.isActive()
+            for domain in conn.listAllDomains()
+            if state is None or state == domain.isActive()
+        }
 
     def _get_ip_of_vm(self, vm):
         conn = self._get_conn()
