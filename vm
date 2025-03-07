@@ -23,7 +23,7 @@ class CliBackend:
     def __init__(self):
         self.fast_mode = False
 
-    def _get_vm_list(self, state=None):
+    def get_vm_list(self, state=None):
         texts = _sh_out(f'virsh list --all')
         lines = texts.strip().split('\n')[2:]
         vms = {}
@@ -34,7 +34,7 @@ class CliBackend:
             if state is None or state == running: vms[name] = running
         return vms
 
-    def _get_vm_config(self, vm):
+    def get_vm_config(self, vm):
         texts = _sh_out(f'virsh dumpxml "{vm}"').strip()
         et = ET.fromstring(texts)
         pci = []
@@ -47,13 +47,13 @@ class CliBackend:
         cpu = int(et.find('.//vcpu').text)
         return pci, mem, cpu
 
-    def _get_ip_of_vm(self, vm):
+    def get_ip_of_vm(self, vm):
         cmd = f'virsh domifaddr {vm}'
         line = _sh_out(cmd).strip().split('\n')[-1]
         if not 'ipv4' in line: return
         ip_full = line.split(' ')[-1]
         return ip_full.split('/')[0]
-    def _get_hdd(self, vm):
+    def get_hdd(self, vm):
         out = _sh_out(f'virsh domblklist {vm} | grep -E "vda|hda"')
         return out.strip().split(' ')[-1]
 
@@ -73,7 +73,7 @@ class ApiBackend:
                 raise Exception('Failed to connect to QEMU/KVM')
         return self._conn
 
-    def _get_vm_list(self, state=None):
+    def get_vm_list(self, state=None):
         conn = self._get_conn()
         return {
             domain.name(): domain.isActive()
@@ -81,7 +81,7 @@ class ApiBackend:
             if state is None or state == domain.isActive()
         }
 
-    def _get_ip_of_vm(self, vm):
+    def get_ip_of_vm(self, vm):
         conn = self._get_conn()
         domain = conn.lookupByName(vm)
         if domain is None: return None
@@ -96,7 +96,7 @@ class ApiBackend:
                 if lease['mac'] in macs: return lease['ipaddr']
         return None
 
-    def _get_vm_config(self, vm):
+    def get_vm_config(self, vm):
         conn = self._get_conn()
         domain = conn.lookupByName(vm)
         if domain is None: return [], 0, 0
@@ -114,7 +114,7 @@ class ApiBackend:
         cpu = int(xml_root.find('.//vcpu').text)
         return pci, mem, cpu
 
-    def _get_hdd(self, vm):
+    def get_hdd(self, vm):
         conn = self._get_conn()
         domain = conn.lookupByName(vm)
         if domain is None: return None
@@ -130,16 +130,16 @@ class ApiBackend:
 backend = ApiBackend()
 
 def _vm_info(vm):
-    vms = backend._get_vm_list()
-    hdd = backend._get_hdd(vm)
-    pci, mem, cpu = backend._get_vm_config(vm)
+    vms = backend.get_vm_list()
+    hdd = backend.get_hdd(vm)
+    pci, mem, cpu = backend.get_vm_config(vm)
     print(f'''
 Name: {vm}
 Running: {vms[vm]}
 CPU cores: {cpu}
 System Memory: {mem}
 PCI: {pci}
-IP: {backend._get_ip_of_vm(vm)}
+IP: {backend.get_ip_of_vm(vm)}
 HDD: {hdd}
 '''.strip())
     _sh(f'qemu-img info {hdd} | grep -E "backing file:|virtual size|disk size"')
@@ -171,7 +171,7 @@ def gpu(vm=None, *devices):
     _sh(cmd)
 
 def ls(**kwargs):
-    vms = backend._get_vm_list()
+    vms = backend.get_vm_list()
     if not vms: return
     verbose = backend.fast_mode or '-v' in kwargs
     name_len_max = max([len(name) for name in vms])
@@ -180,8 +180,8 @@ def ls(**kwargs):
         running = vms[name]
         pci, cpu, mem, ip = [], 0, 0, ''
         if verbose:
-            pci, mem, cpu = backend._get_vm_config(name)
-            ip = backend._get_ip_of_vm(name) or '-'
+            pci, mem, cpu = backend.get_vm_config(name)
+            ip = backend.get_ip_of_vm(name) or '-'
         print(f'{name:<{name_len_max}}\t {running:5} {cpu:>4} {mem:6.1f} {ip:>16}  {pci}')
 cmd_list = ls
 
@@ -206,13 +206,13 @@ def _wait_host(ip):
 def _wait_vm_ip(vm):
     log = DynamicLog(2)
     while True:
-        ip = backend._get_ip_of_vm(vm)
+        ip = backend.get_ip_of_vm(vm)
         if ip: break
         log.print(f'ip not found for {vm}, try again later')
     log.done()
     return ip
 def ssh(vm, command=None):
-    vms = backend._get_vm_list()
+    vms = backend.get_vm_list()
     if not vms[vm]: return print(f'Error: vm {vm} not running')
     ip = _wait_vm_ip(vm)
     _wait_host(ip)
@@ -222,14 +222,14 @@ def ssh(vm, command=None):
 sh = ssh
 
 def run(vm, cmd=None):
-    vms = backend._get_vm_list()
+    vms = backend.get_vm_list()
     if not vms[vm]: start(vm)
     return ssh(vm, cmd)
 
 def _change_name_to_ip(filepath):
     if ':' not in filepath: return filepath
     vm, file = filepath.split(':')
-    ip = backend._get_ip_of_vm(vm)
+    ip = backend.get_ip_of_vm(vm)
     return f'root@{ip}:{file}'
 def scp(src, dst):
     src = _change_name_to_ip(src)
@@ -257,7 +257,7 @@ def _complete(*_):
     state = None
     if words[1] in ['stop', 'down', 'ssh', 'sh', 'scp', 'cp']: state = True
     if words[1] in ['start', 'up']: state = False
-    _print_list(backend._get_vm_list(state), word1)
+    _print_list(backend.get_vm_list(state), word1)
 def install():
     _sh(f'''set -x;
         sudo usermod -a -G libvirt $USER
@@ -273,7 +273,7 @@ def _fork_one_vm(base, base_hdd, vm):
         virt-clone --original "{base}" --name "{vm}" --file "{new_hdd}" --preserve-data &&
         virt-sysprep -d {vm} --operation machine-id''')
 def fork(base, *vms):
-    base_hdd = backend._get_hdd(base)
+    base_hdd = backend.get_hdd(base)
     backing_file = _sh_out(f'qemu-img info {base_hdd} | grep -E "backing file:"').strip()
     if backing_file:
         print(f'Warn: the disk of the vm is derived disk!\n{base}: {base_hdd}\n{backing_file}')
@@ -289,7 +289,7 @@ def start(*vms):
 up = start
 
 def stop(*vms, **kwargs):
-    vms_info = backend._get_vm_list()
+    vms_info = backend.get_vm_list()
     if '-a' in kwargs: vms = vms_info.keys()
     for vm in vms:
         if vms_info[vm]: _sh(f'virsh destroy {vm}')
