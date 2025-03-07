@@ -176,7 +176,9 @@ def ls(**kwargs):
     verbose = backend.fast_mode or '-v' in kwargs
     name_len_max = max([len(name) for name in vms])
     print(f'{"NAME":<{name_len_max}}\t STATE\tCPU {"MEM":>6} {"IP":>16}  PCI')
-    for name in vms:
+    active = [name for name in vms if vms[name]]
+    inactive = [name for name in vms if not vms[name]]
+    for name in active + inactive:
         running = vms[name]
         pci, cpu, mem, ip = [], 0, 0, ''
         if verbose:
