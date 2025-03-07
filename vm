@@ -261,9 +261,12 @@ def _complete(*_):
     if words[1] in ['start', 'up']: state = False
     _print_list(backend.get_vm_list(state), word1)
 def install():
+    has_apt = _sh('apt --version').returncode == 0
+    if has_apt: deps = 'apt install -y guestfs-tools sshpass'
+    else: deps = 'yum install -y libguestfs-tools sshpass'
     _sh(f'''set -x;
         sudo usermod -a -G libvirt $USER
-        sudo apt install -y guestfs-tools sshpass;
+        sudo {deps};
         sudo cp {os.path.abspath(__file__)} /usr/bin/vm;
         sudo chmod a+x /usr/bin/vm;
         echo 'complete -C "vm _complete" vm' | tee -a ~/.bashrc''')
