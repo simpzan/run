@@ -21,7 +21,7 @@ log = _Log()
 
 def sh(cmds, wait=None, pipe=False):
     stdout = subprocess.PIPE if pipe else None
-    process = subprocess.Popen(cmds, shell=True, text=True, stdout=stdout, stderr=stdout)
+    process = subprocess.Popen(cmds, shell=True, universal_newlines=True, stdout=stdout, stderr=stdout)
     if wait == 0: return process
     out, err = process.communicate(timeout=wait)
     if pipe:
