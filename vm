@@ -312,7 +312,7 @@ def _parse_kwargs(all_args):
     return args, kwargs
 def _get_local_functions():
     return [ name for name, obj in globals().items()
-            if not name.startswith('_') and callable(obj) ]
+            if not name.startswith('_') and callable(obj) and not isinstance(obj, type) ]
 def _main():
     if len(sys.argv) < 2: return _print_list(_get_local_functions())
     _, name, *args = sys.argv
