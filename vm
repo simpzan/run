@@ -290,14 +290,14 @@ def remove(*vms, **kwargs):
 rm = remove
 
 def start(*vms):
-    for vm in vms: _sh(f'virsh start {vm}')
+    for vm in vms: _sh(f'virsh start {vm} > /dev/null')
 up = start
 
 def stop(*vms, **kwargs):
     vms_info = backend.get_vm_list()
     if '-a' in kwargs: vms = vms_info.keys()
     for vm in vms:
-        if vms_info[vm]: _sh(f'virsh destroy {vm}')
+        if vms_info[vm]: _sh(f'virsh destroy {vm} > /dev/null')
 down = stop
 
 def _parse_kwargs(all_args):
