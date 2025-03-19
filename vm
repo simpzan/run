@@ -221,7 +221,7 @@ def ssh(vm, command=None):
     if not vms[vm]: return print(f'Error: vm {vm} not running')
     ip = _wait_vm_ip(vm)
     _wait_host(ip)
-    cmd = f'sshpass -p amd1234 ssh -o StrictHostKeyChecking=no root@{ip}'
+    cmd = f'sshpass -p amd1234 ssh -o StrictHostKeyChecking=no -q root@{ip}'
     if command: cmd += f' -t "{command}"'
     return _sh(cmd).returncode
 sh = ssh
