@@ -226,7 +226,8 @@ def ssh(vm, command=None):
     return _sh(cmd).returncode
 sh = ssh
 
-def run(vm, cmd=None):
+def run(vm, cmd=None, **kwargs):
+    if '--restart' in kwargs: stop(vm)
     vms = backend.get_vm_list()
     if not vms[vm]: start(vm)
     return ssh(vm, cmd)
