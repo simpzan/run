@@ -264,7 +264,7 @@ def _complete(*_):
     if words[1] in ['start', 'up']: state = False
     _print_list(backend.get_vm_list(state), word1)
 def install():
-    has_apt = _sh('apt --version').returncode == 0
+    has_apt = _sh('apt --version >/dev/null 2>&1').returncode == 0
     if has_apt: deps = 'apt install -y guestfs-tools sshpass'
     else: deps = 'yum install -y libguestfs-tools sshpass'
     _sh(f'''set -x;
