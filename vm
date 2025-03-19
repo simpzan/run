@@ -164,11 +164,14 @@ def cpu(vm=None, count=None):
 
 def gpu(vm=None, *devices):
     if not vm: return _sh('lspci | grep -E "acc|Display"')
-    cmd = f'virt-xml {vm} --remove-device --host-dev all\n'
+    cmd = f'virt-xml {vm} --remove-device --host-dev all > /dev/null'
     if devices:
-        suffix = [f'--host-dev {dev}' for dev in devices]
-        cmd += f'virt-xml {vm} --add-device ' + ' '.join(suffix)
-    _sh(cmd)
+        suffix = ' '.join([f'--host-dev {dev}' for dev in devices])
+        cmd += f' && virt-xml {vm} --add-device {suffix} > /dev/null'
+    if _sh(cmd).returncode == 0:
+        print(f"assigned GPU {devices} to VM '{vm}'.")
+    else:
+        print(f"Error: failed to assign GPU {devices} to VM '{vm}'.")
 
 def ls(**kwargs):
     vms = backend.get_vm_list()
