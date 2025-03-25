@@ -222,7 +222,7 @@ def ssh(vm, command=None):
     ip = _wait_vm_ip(vm)
     _wait_host(ip)
     cmd = f'sshpass -p amd1234 ssh -o StrictHostKeyChecking=no -q root@{ip}'
-    if command: cmd += f' -t "{command}"'
+    if command: cmd += f' -T "{command}"'
     return _sh(cmd).returncode
 sh = ssh
 
