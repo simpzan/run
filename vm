@@ -173,6 +173,15 @@ def gpu(vm=None, *devices):
     else:
         print(f"Error: failed to assign GPU {devices} to VM '{vm}'.")
 
+def vf(vm=None, *devices):
+    lines = _sh_out('lspci | grep -E "acc|Display" | grep -E ":02."').strip().split('\n')
+    if not vm:
+        for index, line in enumerate(lines): print(f'{index}: {line}')
+        return
+    vfs = [ line.split(' ')[0] for line in lines ]
+    devs = [ vfs[int(dev)] for dev in devices ]
+    gpu(vm, *devs)
+
 def ls(**kwargs):
     vms = backend.get_vm_list()
     if not vms: return
