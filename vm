@@ -154,7 +154,10 @@ def info(vm=None):
 def mem(vm=None, size=None):
     if not vm: return _sh('free -h')
     size = int(size) * 1024 * 1024
-    _sh(f'virsh setmem {vm} {size} --config > /dev/null')
+    _sh(f'''
+        virsh setmaxmem {vm} {size} --config > /dev/null
+        virsh setmem {vm} {size} --config > /dev/null
+        ''')
 
 def cpu(vm=None, count=None):
     if not vm: return _sh(r'lscpu | grep -E "^CPU\(s\):|NUMA node"')
