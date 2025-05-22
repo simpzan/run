@@ -48,6 +48,10 @@ def list_functions(filename='Runfile.py'):
     for fn in _get_functions(module): print(fn)
 
 def _load_module(file_path):
+    file_path = os.path.abspath(file_path)
+    main = sys.modules['__main__']
+    if os.path.abspath(main.__file__) == file_path: return main
+
     name = os.path.splitext(os.path.basename(file_path))[0]
     spec = importlib.util.spec_from_file_location(name, file_path)
     return spec.loader.load_module()
