@@ -11,12 +11,12 @@ class _Log:
         format = '%(levelname)s %(created)f %(process)d:%(thread)d %(filename)s:%(lineno)d %(message)s'
         logging.basicConfig(format=format, level=logging.DEBUG)
         for idx, char in enumerate('NDIWEF'): logging.addLevelName(idx*10, char)
-    def v(self, msg, *args, **kwargs): self.log.debug(msg, stacklevel=2, *args, **kwargs)
-    def d(self, msg, *args, **kwargs): self.log.debug(msg, stacklevel=2, *args, **kwargs)
-    def i(self, msg, *args, **kwargs): self.log.info(msg, stacklevel=2, *args, **kwargs)
-    def w(self, msg, *args, **kwargs): self.log.warning(msg, stacklevel=2, *args, **kwargs)
-    def e(self, msg, *args, **kwargs): self.log.error(msg, stacklevel=2, *args, **kwargs)
-    def f(self, msg, *args, **kwargs): self.log.critical(msg, stacklevel=2, *args, **kwargs)
+    def v(self, msg='', *args, **kwargs): self.log.debug(msg, stacklevel=2, *args, **kwargs)
+    def d(self, msg='', *args, **kwargs): self.log.debug(msg, stacklevel=2, *args, **kwargs)
+    def i(self, msg='', *args, **kwargs): self.log.info(msg, stacklevel=2, *args, **kwargs)
+    def w(self, msg='', *args, **kwargs): self.log.warning(msg, stacklevel=2, *args, **kwargs)
+    def e(self, msg='', *args, **kwargs): self.log.error(msg, stacklevel=2, *args, **kwargs)
+    def f(self, msg='', *args, **kwargs): self.log.critical(msg, stacklevel=2, *args, **kwargs)
 log = _Log()
 
 def sh(cmds, wait=None, pipe=False):
