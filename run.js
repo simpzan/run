@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // console.log('loaded', import.meta.url)
 
-import { pathToFileURL } from 'url';
+import { pathToFileURL } from 'url'
 
 export async function complete() {
     const { COMP_LINE, COMP_POINT } = process.env
@@ -12,18 +12,21 @@ export async function complete() {
 }
 export async function install() {
     console.log('Installing...')
-    const { $ } = await import('bun');
+    const { $ } = await import('bun')
     // install bun.js
 
     await $`
-        sudo cp ${import.meta.filename} /usr/local/bin/run.js
-        sudo chmod a+x /usr/local/bin/run.js
-        echo 'complete -C "run.js complete" run.js' | tee -a ~/.bashrc
+        sudo cp ${import.meta.filename} /usr/local/bin/run_js
+        sudo chmod a+x /usr/local/bin/run_js
+        echo 'complete -C "run_js complete" run_js Runfile.js' | tee -a ~/.bashrc
     `
 }
-export async function listFunctions(filename, prefix) {
+async function loadModule(filename) {
     const fileUrl = pathToFileURL(filename)
-    const module = await import(fileUrl)
+    return await import(fileUrl)
+}
+export async function listFunctions(filename, prefix) {
+    const module = await loadModule(filename)
     printFunctions(module, prefix)
 }
 function printFunctions(module, prefix = '') {
@@ -33,9 +36,10 @@ function printFunctions(module, prefix = '') {
         .forEach(fn => console.log(fn))
 }
 export async function main(meta) {
-    const fileUrl = meta.url
+    let file = meta.file
+    if (file === 'run_js') file = './Runfile.js'
     // console.log(`main(fileUrl: ${fileUrl})`)
-    const module = await import(fileUrl)
+    const module = await loadModule(file)
     const [, , name, ...args] = process.argv
     const fn = module[name]
     if (!fn) return printFunctions(module)
