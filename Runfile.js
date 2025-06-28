@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 // console.log('loaded', import.meta.url);
 
 export async function test(...args) {
