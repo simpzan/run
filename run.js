@@ -1,50 +1,36 @@
+#!/usr/bin/env bun
 // console.log('loaded', import.meta.url)
 
 import { pathToFileURL } from 'url';
-import { writeFileSync } from 'fs';
 
-const complete_prefix = '${COMP_WORDS[$COMP_CWORD]}'
-const _bash_script = `
-run_js() {
-  if [[ -z "$@" ]]; then
-    if [[ -f ./Runfile.js ]]; then
-      bun ./Runfile.js
-    else
-      bun run.js generate_script
-    fi
-  elif [[ "$1" == "-h" ]]; then
-    echo "run, the minimalist's task runner - https://github.com/simpzan/run"
-  else
-    TIMEFORMAT="Task '$1' completed in %3lR"
-    time bun ./Runfile.js "$@"
-  fi
+export async function complete() {
+    const { COMP_LINE, COMP_POINT } = process.env
+    const line_prefix = COMP_LINE.slice(0, COMP_POINT)
+    const words = line_prefix.split(' ')
+    const last_word = words[words.length - 1]
+    listFunctions('./Runfile.js', last_word)
 }
-_run_completion_complete() {
-  [[ ! -f ./Runfile.js ]] && return
-  local result=$(compgen -W "$(bun ./Runfile.js)" "${complete_prefix}")
-  COMPREPLY=($result)
-}
-complete -F _run_completion_complete run_js Runfile.js
-`
-
 export async function install() {
     console.log('Installing...')
+    const { $ } = await import('bun');
     // install bun.js
 
-    // copy run.js
-    // write _bash_script
-    const bash_file = process.env.HOME + '/.run.js.bash'
-    writeFileSync(bash_file, _bash_script.trim(), 'utf8')
-    // update ~/.bashrc
+    await $`
+        sudo cp ${import.meta.filename} /usr/local/bin/run.js
+        sudo chmod a+x /usr/local/bin/run.js
+        echo 'complete -C "run.js complete" run.js' | tee -a ~/.bashrc
+    `
 }
-export async function listFunctions(filename = './Runfile.js') {
+export async function listFunctions(filename, prefix) {
     const fileUrl = pathToFileURL(filename)
     const module = await import(fileUrl)
-    printFunctions(module)
+    printFunctions(module, prefix)
 }
-function printFunctions(module) {
+function printFunctions(module, prefix = '') {
     // console.error('No function specified. Available functions:')
-    Object.keys(module).forEach(fn => console.log(fn))
+    Object.keys(module)
+        .filter(fn => fn.startsWith(prefix))
+        .forEach(fn => console.log(fn))
 }
 export async function main(meta) {
     const fileUrl = meta.url

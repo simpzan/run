@@ -8,7 +8,7 @@ export async function test(...args) {
 }
 
 export function hello() {
-    console.log(`Hello from ${import.meta.url}`);
+    console.log(`Hello from ${import.meta.filename}`);
 }
 
 async function minimain() {
@@ -17,10 +17,10 @@ async function minimain() {
     const fn = module[name]
     if (fn) return await fn(...args)
 }
-if (import.meta.main) minimain()
+// if (import.meta.main) minimain()
 
-// if (import.meta.main) {
-//     const { main } = await import("./run.js");
-//     main(import.meta).catch(console.error);
-// }
+if (import.meta.main) {
+    const { main } = await import("./run.js");
+    main(import.meta).catch(console.error);
+}
 
