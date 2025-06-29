@@ -35,11 +35,9 @@ function printFunctions(module, prefix = '') {
 }
 function createRunfile(file) {
     const template = `#!/usr/bin/env bun
-
 export function hello() {
-    console.log('Hello')
+    console.log('Hello World!')
 }
-
 async function minimain() {
     const module = await import(import.meta.url)
     const [, , name, ...args] = process.argv
@@ -48,8 +46,8 @@ async function minimain() {
 }
 if (import.meta.main) minimain()
 `
-    const mode = 0o755 // Make it executable
-    writeFileSync(file, template, { mode })
+    writeFileSync(file, template, { mode: 0o755 })
+    console.log(`${file} created!`)
 }
 
 export async function main(meta) {
