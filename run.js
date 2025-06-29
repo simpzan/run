@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 // console.log('loaded', import.meta.url)
 
-import { pathToFileURL } from 'url'
-import { existsSync, writeFileSync } from 'fs'
+import { pathToFileURL } from 'node:url'
+import { existsSync, writeFileSync } from 'node:fs'
 
 export async function complete() {
     const { COMP_LINE, COMP_POINT } = process.env
