@@ -16,7 +16,7 @@ export async function install() {
     await $`
         sudo cp ${import.meta.filename} /usr/local/bin/run.js
         sudo chmod a+x /usr/local/bin/run.js
-        echo 'complete -C "run.js .complete" run.js' | tee -a ~/.bashrc
+        echo 'complete -C "run.js .complete" run.js Runfile.js' | tee -a ~/.bashrc
     `
     console.log('`run.js` installed! restart shell session to use it.')
 }
