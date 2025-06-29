@@ -16,6 +16,8 @@
 curl -OL https://raw.githubusercontent.com/simpzan/run/main/run.sh && bash run.sh
 # python version
 curl -OL https://raw.githubusercontent.com/simpzan/run/main/run.py && python3 run.py install
+# js version
+curl -OL https://raw.githubusercontent.com/simpzan/run/main/run.js && bun run.js .install
 ```
 
 # use
