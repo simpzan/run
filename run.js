@@ -41,6 +41,7 @@ async function minimain() {
     const [, , name, ...args] = process.argv
     const fn = module[name]
     if (fn) return await fn(...args)
+    Object.keys(module).forEach(fn => console.log(fn))
 }
 if (import.meta.main) minimain()
 `

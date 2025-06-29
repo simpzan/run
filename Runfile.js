@@ -17,11 +17,8 @@ async function minimain() {
     const [, , name, ...args] = process.argv
     const fn = module[name]
     if (fn) return await fn(...args)
+    Object.keys(module).forEach(fn => console.log(fn))
 }
-// if (import.meta.main) minimain()
+if (import.meta.main) minimain()
 
-if (import.meta.main) {
-    const { main } = await import("./run.js");
-    main(import.meta).catch(console.error);
-}
 
