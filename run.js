@@ -3,6 +3,7 @@
 
 import { pathToFileURL } from 'node:url'
 import { existsSync, writeFileSync } from 'node:fs'
+import { execSync } from 'node:child_process'
 
 export async function complete() {
     const { COMP_LINE, COMP_POINT } = process.env
@@ -12,12 +13,11 @@ export async function complete() {
     listFunctions('./Runfile.js', last_word)
 }
 export async function install() {
-    const { $ } = await import('bun')
-    await $`
+    execSync(`
         sudo cp ${import.meta.filename} /usr/local/bin/run.js
         sudo chmod a+x /usr/local/bin/run.js
         echo 'complete -C "run.js .complete" run.js Runfile.js' | tee -a ~/.bashrc
-    `
+    `)
     console.log('`run.js` installed! restart shell session to use it.')
 }
 export async function listFunctions(filename, prefix) {
