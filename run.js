@@ -18,7 +18,7 @@ export async function install() {
     await $`
         sudo cp ${import.meta.filename} /usr/local/bin/run.js
         sudo chmod a+x /usr/local/bin/run.js
-        echo 'complete -C "run.js complete" run.js' | tee -a ~/.bashrc
+        echo 'complete -C "run.js .complete" run.js' | tee -a ~/.bashrc
     `
 }
 export async function listFunctions(filename, prefix) {
@@ -33,10 +33,14 @@ function printFunctions(module, prefix = '') {
         .forEach(fn => console.log(fn))
 }
 export async function main(meta) {
-    const fileUrl = meta.url
-    // console.log(`main(fileUrl: ${fileUrl})`)
-    const module = await import(fileUrl)
-    const [, , name, ...args] = process.argv
+    let file = './Runfile.js'
+    let [, , name, ...args] = process.argv
+    if (!name) return listFunctions(file, '')
+    if (name.startsWith('.')) {
+        file = import.meta.file
+        name = name.slice(1)
+    }
+    const module = await import(pathToFileURL(file))
     const fn = module[name]
     if (!fn) return printFunctions(module)
     if (fn === main) return console.error('Cannot call main directly')
