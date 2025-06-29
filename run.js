@@ -20,13 +20,11 @@ export async function install() {
     `)
     console.log('`run.js` installed! restart shell session to use it.')
 }
-export async function listFunctions(filename, prefix) {
-    const fileUrl = pathToFileURL(filename)
-    const module = await import(fileUrl)
+async function listFunctions(filename, prefix) {
+    const module = await import(pathToFileURL(filename))
     printFunctions(module, prefix)
 }
 function printFunctions(module, prefix = '') {
-    // console.error('No function specified. Available functions:')
     Object.keys(module)
         .filter(fn => fn.startsWith(prefix))
         .forEach(fn => console.log(fn))
