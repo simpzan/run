@@ -20,6 +20,7 @@ export async function install() {
     `)
     console.log('`run.js` installed! restart shell session to use it.')
 }
+
 async function listFunctions(filename, prefix) {
     const module = await import(pathToFileURL(filename))
     printFunctions(module, prefix)
@@ -29,6 +30,7 @@ function printFunctions(module, prefix = '') {
         .filter(fn => fn.startsWith(prefix))
         .forEach(fn => console.log(fn))
 }
+
 function createRunfile(file) {
     const template = `#!/usr/bin/env bun
 export function hello() {
@@ -47,6 +49,13 @@ if (import.meta.main) minimain()
     console.log(`${file} created!`)
 }
 
+async function runTask(file, name, ...args) {
+    const module = await import(pathToFileURL(file))
+    const fn = module[name]
+    if (!fn) return printFunctions(module)
+    return await fn(...args)
+}
+
 async function main() {
     let file = './Runfile.js'
     let [, , name, ...args] = process.argv
@@ -58,10 +67,7 @@ async function main() {
         file = import.meta.filename
         name = name.slice(1)
     }
-    const module = await import(pathToFileURL(file))
-    const fn = module[name]
-    if (!fn) return printFunctions(module)
-    return await fn(...args)
+    return await runTask(file, name, ...args)
 }
 
 if (import.meta.main) main().catch(console.error)
