@@ -12,15 +12,13 @@ export async function complete() {
     listFunctions('./Runfile.js', last_word)
 }
 export async function install() {
-    console.log('Installing...')
     const { $ } = await import('bun')
-    // install bun.js
-
     await $`
         sudo cp ${import.meta.filename} /usr/local/bin/run.js
         sudo chmod a+x /usr/local/bin/run.js
         echo 'complete -C "run.js .complete" run.js' | tee -a ~/.bashrc
     `
+    console.log('`run.js` installed! restart shell session to use it.')
 }
 export async function listFunctions(filename, prefix) {
     const fileUrl = pathToFileURL(filename)
