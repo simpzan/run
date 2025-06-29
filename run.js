@@ -49,7 +49,7 @@ if (import.meta.main) minimain()
     console.log(`${file} created!`)
 }
 
-export async function main(meta) {
+async function main() {
     let file = './Runfile.js'
     let [, , name, ...args] = process.argv
     if (!name) {
@@ -63,8 +63,7 @@ export async function main(meta) {
     const module = await import(pathToFileURL(file))
     const fn = module[name]
     if (!fn) return printFunctions(module)
-    if (fn === main) return console.error('Cannot call main directly')
     return await fn(...args)
 }
 
-if (import.meta.main) main(import.meta).catch(console.error)
+if (import.meta.main) main().catch(console.error)
