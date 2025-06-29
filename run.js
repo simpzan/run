@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 // console.log('loaded', import.meta.url)
 
-import { pathToFileURL } from 'url';
-import { existsSync, writeFileSync } from 'fs';
+import { pathToFileURL } from 'url'
+import { existsSync, writeFileSync } from 'fs'
 
 export async function complete() {
     const { COMP_LINE, COMP_POINT } = process.env
@@ -13,7 +13,7 @@ export async function complete() {
 }
 export async function install() {
     console.log('Installing...')
-    const { $ } = await import('bun');
+    const { $ } = await import('bun')
     // install bun.js
 
     await $`
@@ -37,7 +37,7 @@ function createRunfile(file) {
     const template = `#!/usr/bin/env bun
 
 export function hello() {
-    console.log('Hello');
+    console.log('Hello')
 }
 
 async function minimain() {
