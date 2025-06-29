@@ -2,6 +2,7 @@
 // console.log('loaded', import.meta.url)
 
 import { pathToFileURL } from 'url';
+import { existsSync, writeFileSync } from 'fs';
 
 export async function complete() {
     const { COMP_LINE, COMP_POINT } = process.env
@@ -32,10 +33,32 @@ function printFunctions(module, prefix = '') {
         .filter(fn => fn.startsWith(prefix))
         .forEach(fn => console.log(fn))
 }
+function createRunfile(file) {
+    const template = `#!/usr/bin/env bun
+
+export function hello() {
+    console.log('Hello');
+}
+
+async function minimain() {
+    const module = await import(import.meta.url)
+    const [, , name, ...args] = process.argv
+    const fn = module[name]
+    if (fn) return await fn(...args)
+}
+if (import.meta.main) minimain()
+`
+    const mode = 0o755 // Make it executable
+    writeFileSync(file, template, { mode })
+}
+
 export async function main(meta) {
     let file = './Runfile.js'
     let [, , name, ...args] = process.argv
-    if (!name) return listFunctions(file, '')
+    if (!name) {
+        if (existsSync(file)) return listFunctions(file, '')
+        else return createRunfile(file)
+    }
     if (name.startsWith('.')) {
         file = import.meta.file
         name = name.slice(1)
