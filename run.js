@@ -60,7 +60,7 @@ export async function main(meta) {
         else return createRunfile(file)
     }
     if (name.startsWith('.')) {
-        file = import.meta.file
+        file = import.meta.filename
         name = name.slice(1)
     }
     const module = await import(pathToFileURL(file))
