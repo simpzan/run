@@ -256,6 +256,8 @@ def scp(src, dst):
     _sh(f'sshpass -p amd1234 scp -r {src} {dst}')
 cp = scp
 
+def console(vm): _sh(f'virsh console --force {vm}')
+
 def _get_gpus():
     texts = _sh_out('lspci | grep -E "acc|Display"')
     out = [line.split(' ')[0] for line in texts.strip().split('\n')]
@@ -274,7 +276,7 @@ def _complete(*_):
     if words[1] == 'gpu' and len(words) > 3:
         return _print_list(_get_gpus(), word1)
     state = None
-    if words[1] in ['stop', 'down', 'ssh', 'sh', 'scp', 'cp']: state = True
+    if words[1] in ['stop', 'down', 'ssh', 'sh', 'scp', 'cp', 'console']: state = True
     if words[1] in ['start', 'up']: state = False
     _print_list(backend.get_vm_list(state), word1)
 def install():
