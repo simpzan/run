@@ -256,6 +256,9 @@ def scp(src, dst):
     _sh(f'sshpass -p amd1234 scp -r {src} {dst}')
 cp = scp
 
+def xml(vm, edit=''):
+    cmd = 'edit' if edit else 'dumpxml'
+    _sh(f'virsh {cmd} {vm}')
 def console(vm): _sh(f'virsh console --force {vm}')
 
 def _get_gpus():
