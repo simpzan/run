@@ -5,7 +5,7 @@ import subprocess
 import time
 import xml.etree.ElementTree as ET
 
-os.environ['VIRSH_DEFAULT_CONNECT_URI'] = 'qemu:///system'
+os.environ['LIBVIRT_DEFAULT_URI'] = 'qemu:///system'
 
 def _sh(cmds, wait=None, pipe=False):
     stdout = subprocess.PIPE if pipe else None
