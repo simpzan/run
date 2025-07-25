@@ -279,7 +279,7 @@ def _complete(*_):
     if words[1] == 'gpu' and len(words) > 3:
         return _print_list(_get_gpus(), word1)
     state = None
-    if words[1] in ['stop', 'down', 'ssh', 'sh', 'scp', 'cp', 'console']: state = True
+    if words[1] in ['stop', 'down', 'ssh', 'sh', 'scp', 'cp', 'console', 'restart']: state = True
     if words[1] in ['start', 'up']: state = False
     _print_list(backend.get_vm_list(state), word1)
 def install():
@@ -321,6 +321,10 @@ def stop(*vms, **kwargs):
     for vm in vms:
         if vms_info[vm]: _sh(f'virsh destroy {vm} > /dev/null')
 down = stop
+
+def restart(*vms):
+    stop(*vms)
+    start(*vms)
 
 def _parse_kwargs(all_args):
     kwargs = {}
