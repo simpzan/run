@@ -43,9 +43,10 @@ def _get_functions(module):
     items = vars(module).items()
     return [fn for fn, obj in items if is_public(fn, obj)]
 
-def list_functions(filename='Runfile.py'):
+def list_functions(filename='Runfile.py', prefix=''):
     module = _load_module(filename)
-    for fn in _get_functions(module): print(fn)
+    for fn in _get_functions(module):
+        if fn.startswith(prefix): print(fn)
 
 def _load_module(file_path):
     file_path = os.path.abspath(file_path)
@@ -75,49 +76,24 @@ def generate_script():
     os.chmod(file, 0o755)
     print(f'{file} created!')
 
-_bash_script = r'''
-run_py() {
-  if [[ -z "$@" ]]; then
-    if [[ -f ./Runfile.py ]]; then
-      python3 -m run list_functions
-    else
-      python3 -m run generate_script
-    fi
-  elif [[ "$1" == "-h" ]]; then
-    echo "run, the minimalist's task runner - https://github.com/simpzan/run"
-  else
-    TIMEFORMAT="Task '$1' completed in %3lR"
-    time python3 ./Runfile.py "$@"
-  fi
-}
-_run_completion_complete() {
-  [[ ! -f ./Runfile.py ]] && return
-  local prefix=${COMP_WORDS[$COMP_CWORD]}
-  local result=$(compgen -W "$(python3 -m run list_functions)" "$prefix")
-  COMPREPLY=($result)
-}
-_run_completion_install() {
-  if [[ -n "${ZSH_VERSION+x}" ]]; then
-    ! which compinit >/dev/null && autoload -Uz compinit && compinit
-    ! which bashcompinit >/dev/null && autoload -Uz bashcompinit && bashcompinit
-  fi
-  complete -F _run_completion_complete run_py Runfile.py
-}
-_run_completion_install
-'''
 def install():
-    site_packages_dir = sys.path[-1]
     current_file_path = os.path.abspath(__file__)
-    sh(f'''set -x; sudo cp {current_file_path} {site_packages_dir}''')
+    run_file = '/usr/local/bin/run.py'
+    sh(f'''
+sudo cp {current_file_path} {run_file};
+sudo chmod a+x {run_file};
+echo 'complete -C "{run_file} complete" run.py Runfile.py' | tee -a ~/.bashrc;
+echo '`run.py` installed! restart shell session to use it.'
+    ''')
 
-    bash_file = '~/.run.bash'
-    _write_text_file(_bash_script.lstrip(), bash_file)
+def complete(*_):
+    comp_line = os.getenv('COMP_LINE', '')
+    comp_point = int(os.getenv('COMP_POINT', len(comp_line)))
+    line_prefix = comp_line[:comp_point]
+    words = line_prefix.split(' ')
+    last_word = words[-1] if words else ''
 
-    load_script = f'[[ $PS1 && -f {bash_file} ]] && source {bash_file}\n'
-    _write_text_file(load_script, '~/.bashrc', 'a')
-    print(f'installed {bash_file}, restart shell session to use it.')
-
-    print('installed `run` command')
+    list_functions('./Runfile.py', last_word)
 
 def _run_task_file(filename, fn, args):
     tasks = _load_module(filename)
