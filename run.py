@@ -119,7 +119,12 @@ def _parse_kwargs(all_args):
     return args, kwargs
 
 def run_main(filename):
-    if len(sys.argv) < 2: return list_functions(filename)
+    if len(sys.argv) < 2:
+        file = './Runfile.py'
+        if os.path.isfile(file):
+            return list_functions(file)
+        else:
+            return generate_script()
     _, fn, *args = sys.argv
     code = _run_task_file(filename, fn, args)
     sys.exit(code)
