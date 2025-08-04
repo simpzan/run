@@ -184,7 +184,14 @@ def _xf(dev_code, vm=None, *devices):
     devs = [ vfs[int(dev)] for dev in devices ]
     gpu(vm, *devs)
 def vf(vm=None, *devices): _xf('02', vm, *devices)
-def pf(vm=None, *devices): _xf('00', vm, *devices)
+def pf(vm=None, *devices):
+    _xf('00', vm, *devices)
+    if not devices: return
+    xml = _sh_out(f'virsh dumpxml {vm} | tee /tmp/backup.vm.xml')
+    xml = xml.replace('</hostdev>', '<rom bar="off"/></hostdev>')
+    file = '/tmp/tmp.vm.xml'
+    with open(file, 'w') as f: f.write(xml)
+    _sh(f'virsh undefine {vm} && virsh define {file}')
 
 def ls(**kwargs):
     vms = backend.get_vm_list()
