@@ -186,7 +186,9 @@ def _xf(dev_code, vm=None, *devices):
 def vf(vm=None, *devices): _xf('02', vm, *devices)
 def pf(vm=None, *devices):
     _xf('00', vm, *devices)
-    if not devices: return
+    if not devices or os.environ.get('rom_bar') == '1': return
+    _disable_rom_bar(vm)
+def _disable_rom_bar(vm):
     xml = _sh_out(f'virsh dumpxml {vm} | tee /tmp/backup.vm.xml')
     xml = xml.replace('</hostdev>', '<rom bar="off"/></hostdev>')
     file = '/tmp/tmp.vm.xml'
