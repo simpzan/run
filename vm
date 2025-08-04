@@ -298,7 +298,7 @@ def install():
         sudo {deps};
         sudo cp {os.path.abspath(__file__)} /usr/bin/vm;
         sudo chmod a+x /usr/bin/vm;
-        sudo ln -s /usr/bin/vm {sys.path[-1]}/vm.py;
+        sudo ln -sf /usr/bin/vm {sys.path[-1]}/vm.py;
         echo 'complete -C "vm _complete" vm' | tee -a ~/.bashrc''')
     print(f'installed `vm` command, restart shell session to use it.')
 
