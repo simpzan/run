@@ -161,7 +161,24 @@ def mem(vm=None, size=None):
 
 def cpu(vm=None, count=None):
     if not vm: return _sh(r'lscpu | grep -E "^CPU\(s\):|NUMA node"')
-    _sh(f'virt-xml {vm}  --edit --vcpus {count}')
+    n = int(count)
+    _sh(f'virt-xml {vm}  --edit --vcpus {n},sockets=1,cores={n//2},threads=2')
+    if os.environ.get('vcpupin') == '1': _vcpupin(vm)
+
+def _get_cpu_offset():
+    node0Str = _sh_out('lscpu | grep node0').strip()
+    number = node0Str.split(',')[1].split('-')[0]
+    return int(number)
+def _vcpupin(vm):
+    _, _1, count = backend.get_vm_config(vm)
+    offset = _get_cpu_offset()
+    cmds = ''
+    for i in range(count):
+        cpuid = i // 2
+        if i % 2: cpuid += offset
+        cmds += f" virsh vcpupin {vm} --config {i} {cpuid} > /dev/null &&"
+    cmds += 'echo "vcpu pin done"'
+    _sh(cmds)
 
 def gpu(vm=None, *devices):
     if not vm: return _sh('lspci | grep -E "acc|Display"')
