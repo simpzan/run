@@ -7,8 +7,15 @@ import importlib.util
 class _Log:
     def __init__(self, name=__name__):
         import logging
+        import threading
+        old_factory = logging.getLogRecordFactory()
+        def record_factory(*args, **kwargs):
+            record = old_factory(*args, **kwargs)
+            record.tid = threading.get_native_id()
+            return record
+        logging.setLogRecordFactory(record_factory)
         self.log = logging.getLogger(name)
-        format = '%(levelname)s %(asctime)s.%(msecs)03d %(process)d:%(thread)d %(filename)s:%(lineno)d %(message)s'
+        format = '%(levelname)s %(asctime)s.%(msecs)03d %(process)d:%(tid)d %(filename)s:%(lineno)d %(message)s'
         handler = logging.StreamHandler(sys.stdout)
         handler.setFormatter(logging.Formatter(fmt=format, datefmt='%m-%d %H:%M:%S'))
         self.log.addHandler(handler)
