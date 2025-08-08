@@ -8,8 +8,11 @@ class _Log:
     def __init__(self, name=__name__):
         import logging
         self.log = logging.getLogger(name)
-        format = '%(levelname)s %(created)f %(process)d:%(thread)d %(filename)s:%(lineno)d %(message)s'
-        logging.basicConfig(format=format, level=logging.DEBUG)
+        format = '%(levelname)s %(asctime)s.%(msecs)03d %(process)d:%(thread)d %(filename)s:%(lineno)d %(message)s'
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(logging.Formatter(fmt=format, datefmt='%m-%d %H:%M:%S'))
+        self.log.addHandler(handler)
+        self.log.setLevel(logging.INFO)
         for idx, char in enumerate('NDIWEF'): logging.addLevelName(idx*10, char)
     def v(self, msg='', *args, **kwargs): self.log.debug(msg, stacklevel=2, *args, **kwargs)
     def d(self, msg='', *args, **kwargs): self.log.debug(msg, stacklevel=2, *args, **kwargs)
