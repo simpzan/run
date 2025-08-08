@@ -15,7 +15,7 @@ class _Log:
             return record
         logging.setLogRecordFactory(record_factory)
         self.log = logging.getLogger(name)
-        format = '%(levelname)s %(asctime)s.%(msecs)03d %(process)d:%(tid)d %(filename)s:%(lineno)d %(message)s'
+        format = '%(levelname)s %(asctime)s.%(msecs)03d %(process)d:%(tid)d %(funcName)s:%(lineno)d %(message)s'
         handler = logging.StreamHandler(sys.stdout)
         handler.setFormatter(logging.Formatter(fmt=format, datefmt='%m-%d %H:%M:%S'))
         self.log.addHandler(handler)
