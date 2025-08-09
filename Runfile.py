@@ -35,13 +35,17 @@ du -sh . *
 def kwargs_test(*args, **kwargs):
     print(args, kwargs)
 
-def __minimal_main():
+def list_local_functions():
+    for name, sym in globals().items():
+        if name.startswith('_'): continue
+        if callable(sym) and sym.__module__ == __name__:
+            print(name)
+def _minimal_main():
     import sys
+    if len(sys.argv) == 1: return list_local_functions()
     _, name, *args = sys.argv
-    sym = globals()[name]
-    if callable(sym): sym(*args)
-    else: sh(sym)
+    globals()[name](*args)
 
 if __name__ == "__main__":
-    # __minimal_main()
-    run_main(__file__)
+    _minimal_main()
+    # run_main(__file__)
