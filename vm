@@ -311,10 +311,11 @@ def _complete(*_):
 def install():
     has_apt = _sh('apt --version >/dev/null 2>&1').returncode == 0
     if has_apt: deps = 'apt install -y guestfs-tools sshpass'
-    else: deps = 'yum install -y libguestfs-tools sshpass'
+    else: deps = 'yum install -y libguestfs-tools sshpass libvirt-devel'
     _sh(f'''set -x;
         sudo usermod -a -G libvirt $USER
         sudo {deps};
+        python3 -m pip install libvirt-python
         sudo cp {os.path.abspath(__file__)} /usr/bin/vm;
         sudo chmod a+x /usr/bin/vm;
         sudo ln -sf /usr/bin/vm {sys.path[-1]}/vm.py;
