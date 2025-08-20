@@ -334,6 +334,23 @@ def fork(base, *vms):
         print(f'Warn: the disk of the vm is derived disk!\n{base}: {base_hdd}\n{backing_file}')
     for vm in vms: _fork_one_vm(base, base_hdd, vm)
 
+def import_vm(name, file, centos=True):
+    os_variant = 'centos8' if centos else 'ubuntu22.10'
+    _sh(f'''
+        virt-install \
+            --name {name} \
+            --memory 32000 \
+            --vcpus 32 \
+            --disk path={file},format=qcow2 \
+            --import \
+            --os-variant {os_variant} \
+            --check path_in_use=off --wait=0 --noreboot
+    ''')
+def clone_vm(base, name):
+    _sh(f'''
+        virt-clone --original {base} --name {name} --file /disk1/vm_images/{name}.qcow2
+    ''')
+
 def remove(*vms, **kwargs):
     options = '--remove-all-storage' if '--rs' in kwargs else ''
     for vm in vms: _sh(f'virsh undefine {options} {vm}')
