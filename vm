@@ -54,8 +54,12 @@ class CliBackend:
         ip_full = line.split(' ')[-1]
         return ip_full.split('/')[0]
     def get_hdd(self, vm):
-        out = _sh_out(f'virsh domblklist {vm} | grep -E "vda|hda|sda"')
-        return out.strip().split(' ')[-1]
+        out = _sh_out(f'virsh domblklist {vm} | grep -E "qcow2"').rstrip()
+        ret = []
+        for line in out.split('\n'):
+            parts = line.strip().split(' ')
+            ret.append((parts[0], parts[-1]))
+        return ret
 
 class ApiBackend:
     """Implementation using libvirt API"""
@@ -119,19 +123,20 @@ class ApiBackend:
         domain = conn.lookupByName(vm)
         if domain is None: return None
 
+        ret = []
         xml_root = ET.fromstring(domain.XMLDesc(0))
         for disk in xml_root.findall(".//devices/disk"):
-            target = disk.find("target")
-            if target is not None and target.get("dev") in ["vda", "hda", "sda"]:
-                source = disk.find("source")
-                if source is not None: return source.get("file")
-        return None
+            if disk.get("device") != "disk": continue
+            dev = disk.find("target").get("dev")
+            file = disk.find("source").get("file")
+            ret.append((dev, file))
+        return ret
 
 backend = CliBackend() if os.environ.get('VMBK') == 'cli' else ApiBackend()
 
 def _vm_info(vm):
     vms = backend.get_vm_list()
-    hdd = backend.get_hdd(vm)
+    hdds = backend.get_hdd(vm)
     pci, mem, cpu = backend.get_vm_config(vm)
     print(f'''
 Name: {vm}
@@ -140,9 +145,11 @@ CPU cores: {cpu}
 System Memory: {mem}
 PCI: {pci}
 IP: {backend.get_ip_of_vm(vm)}
-HDD: {hdd}
+HDD: {len(hdds)}
 '''.strip())
-    _sh(f'qemu-img info {hdd} | grep -E "backing file:|virtual size|disk size"')
+    for idx, (name, hdd) in enumerate(hdds):
+        print(f'{idx}. {name}: {hdd}')
+        _sh(f'qemu-img info {hdd} | grep -E "backing file:|virtual size|disk size"')
 
 def info(vm=None):
     if vm: return _vm_info(vm)
@@ -330,7 +337,7 @@ def _fork_one_vm(base, base_hdd, vm):
         virt-clone --original "{base}" --name "{vm}" --file "{new_hdd}" --preserve-data &&
         virt-sysprep -d {vm} --operation machine-id''')
 def fork(base, *vms):
-    base_hdd = backend.get_hdd(base)
+    base_hdd = backend.get_hdd(base)[0][1]
     backing_file = _sh_out(f'qemu-img info {base_hdd} | grep -E "backing file:"').strip()
     if backing_file:
         print(f'Warn: the disk of the vm is derived disk!\n{base}: {base_hdd}\n{backing_file}')
