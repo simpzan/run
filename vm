@@ -331,17 +331,27 @@ def install():
         echo 'complete -C "vm _complete" vm' | tee -a ~/.bashrc''')
     print(f'installed `vm` command, restart shell session to use it.')
 
-def _fork_one_vm(base, base_hdd, vm):
-    new_hdd = f'{os.path.dirname(base_hdd)}/{vm}.qcow2'
-    _sh(f'''qemu-img create -f qcow2 -F qcow2 -b {base_hdd} "{new_hdd}" &&
-        virt-clone --original "{base}" --name "{vm}" --file "{new_hdd}" --preserve-data &&
-        virt-sysprep -d {vm} --operation machine-id''')
+def _shadow_clone_disks(disks, vm):
+    new_disks = []
+    for _, base_hdd in disks:
+        backing_file = _sh_out(f'qemu-img info {base_hdd} | grep -E "backing file:"').strip()
+        if backing_file:
+            print(f'Warn: the base vm disk is derived disk! {base_hdd}, {backing_file}')
+        dirname = os.path.dirname(base_hdd)
+        basename = os.path.basename(base_hdd)
+        new_hdd = f'{dirname}/{vm}.{basename}'
+        _sh(f'qemu-img create -F qcow2 -b {base_hdd} -f qcow2 "{new_hdd}"')
+        new_disks.append(new_hdd)
+    return new_disks
+
 def fork(base, *vms):
-    base_hdd = backend.get_hdd(base)[0][1]
-    backing_file = _sh_out(f'qemu-img info {base_hdd} | grep -E "backing file:"').strip()
-    if backing_file:
-        print(f'Warn: the disk of the vm is derived disk!\n{base}: {base_hdd}\n{backing_file}')
-    for vm in vms: _fork_one_vm(base, base_hdd, vm)
+    disks = backend.get_hdd(base)
+    for vm in vms:
+        new_disks = _shadow_clone_disks(disks, vm)
+        file_args = ' '.join([f'--file "{disk}" --preserve-data' for disk in new_disks])
+        _sh(f'''
+            virt-clone --original "{base}" --name "{vm}" {file_args} &&
+            virt-sysprep -d {vm} --operation machine-id''')
 
 def import_vm(name, file, centos=True):
     os_variant = 'centos8' if centos else 'ubuntu22.10'
