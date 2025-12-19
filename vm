@@ -134,6 +134,21 @@ class ApiBackend:
 
 backend = CliBackend() if os.environ.get('VMBK') == 'cli' else ApiBackend()
 
+def detach(vm, target):
+    _sh(f'virsh detach-disk {vm} {target} --config')
+
+def attach(vm, size):
+    hdds = backend.get_hdd(vm)
+    dirname = os.path.dirname(hdds[0][1])
+    new_hdd = f'{dirname}/{vm}.new_disk.{len(hdds)}.qcow2'
+    import string
+    target = string.ascii_lowercase[len(hdds)]
+    cmd = f'''
+    qemu-img create -f qcow2 {new_hdd} {size}G
+    virsh attach-disk {vm} {new_hdd} vd{target} --persistent --subdriver qcow2
+    '''
+    _sh(cmd)
+
 def _vm_info(vm):
     vms = backend.get_vm_list()
     hdds = backend.get_hdd(vm)
