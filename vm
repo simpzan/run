@@ -192,8 +192,10 @@ def gpu(vm=None, *devices):
         print(f"Error: failed to assign GPU {devices} to VM '{vm}'.")
 
 def _xf(dev_code, vm=None, *devices):
-    cmd = f'lspci | grep -E "acc|Display" | grep -E ":{dev_code}."'
-    lines = _sh_out(cmd).strip().split('\n')
+    output = _sh_out(f'lspci | grep -E "acc|Display" | grep -E ":{dev_code}."')
+    if not output:
+        return print(f"Error: no GPU found with code {dev_code}")
+    lines = output.strip().split('\n')
     if not vm:
         for index, line in enumerate(lines): print(f'{index}: {line}')
         return
