@@ -137,16 +137,18 @@ backend = CliBackend() if os.environ.get('VMBK') == 'cli' else ApiBackend()
 def detach(vm, target):
     _sh(f'virsh detach-disk {vm} {target} --config')
 
-def attach(vm, size):
+def attach(vm, size_or_file):
     hdds = backend.get_hdd(vm)
-    dirname = os.path.dirname(hdds[0][1])
-    new_hdd = f'{dirname}/{vm}.new_disk.{len(hdds)}.qcow2'
+    if size_or_file.isdigit():
+        dirname = os.path.dirname(hdds[0][1])
+        disk = f'{dirname}/{vm}.new_disk.{len(hdds)}.qcow2'
+        _sh(f'qemu-img create -f qcow2 {disk} {size_or_file}G')
+    else:
+        disk = os.path.abspath(size_or_file)
+    if not os.path.exists(disk):
+        return print(f'Error: disk file {disk} not found')
     target = _disk_get_available_target(hdds)
-    cmd = f'''
-    qemu-img create -f qcow2 {new_hdd} {size}G
-    virsh attach-disk {vm} {new_hdd} {target} --persistent --subdriver qcow2
-    '''
-    _sh(cmd)
+    _sh(f'virsh attach-disk {vm} {disk} {target} --persistent --subdriver qcow2')
 def _disk_get_available_target(hdds):
     used_targets = [hdd[0] for hdd in hdds]
     for i in range(26):
