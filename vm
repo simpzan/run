@@ -225,7 +225,7 @@ def _xf(dev_code, vm=None, *devices):
     lines = output.strip().split('\n')
     if not vm:
         if not output:
-            return print(f"Error: no GPU found with code {dev_code}, '{lines}'")
+            return print(f"Error: no GPU found with code {dev_code}")
         for index, line in enumerate(lines): print(f'{index}: {line}')
         return
     vfs = [ line.split(' ')[0] for line in lines ]
