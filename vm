@@ -141,13 +141,18 @@ def attach(vm, size):
     hdds = backend.get_hdd(vm)
     dirname = os.path.dirname(hdds[0][1])
     new_hdd = f'{dirname}/{vm}.new_disk.{len(hdds)}.qcow2'
-    import string
-    target = string.ascii_lowercase[len(hdds)]
+    target = _disk_get_available_target(hdds)
     cmd = f'''
     qemu-img create -f qcow2 {new_hdd} {size}G
-    virsh attach-disk {vm} {new_hdd} vd{target} --persistent --subdriver qcow2
+    virsh attach-disk {vm} {new_hdd} {target} --persistent --subdriver qcow2
     '''
     _sh(cmd)
+def _disk_get_available_target(hdds):
+    used_targets = [hdd[0] for hdd in hdds]
+    for i in range(26):
+        target = 'vd' + chr(ord('a') + i)
+        if target not in used_targets: return target
+    return None
 
 def _vm_info(vm):
     vms = backend.get_vm_list()
