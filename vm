@@ -222,10 +222,10 @@ def gpu(vm=None, *devices):
 
 def _xf(dev_code, vm=None, *devices):
     output = _sh_out(f'lspci | grep -E "acc|Display" | grep -E ":{dev_code}."')
-    if not output:
-        return print(f"Error: no GPU found with code {dev_code}")
     lines = output.strip().split('\n')
     if not vm:
+        if not output:
+            return print(f"Error: no GPU found with code {dev_code}, '{lines}'")
         for index, line in enumerate(lines): print(f'{index}: {line}')
         return
     vfs = [ line.split(' ')[0] for line in lines ]
