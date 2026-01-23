@@ -88,11 +88,13 @@ def generate_script():
 
 def install():
     current_file_path = os.path.abspath(__file__)
-    run_file = '/usr/local/bin/run.py'
+    run_file = sys.path[-1] + '/run.py'
+    link_file = '/usr/local/bin/run.py'
     sh(f'''
 sudo cp {current_file_path} {run_file};
 sudo chmod a+x {run_file};
-echo 'complete -C "{run_file} complete" run.py Runfile.py' | tee -a ~/.bashrc;
+sudo ln -sf {run_file} {link_file}
+echo 'complete -C "{link_file} complete" run.py Runfile.py' | tee -a ~/.bashrc;
 echo '`run.py` installed! restart shell session to use it.'
     ''')
 
