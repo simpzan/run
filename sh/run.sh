@@ -27,7 +27,7 @@ _run_tasks() {
   echo "Tasks in Runfile:"
   ./Runfile | cat -n
 }
-run() {
+run.sh() {
   if [[ -z "$@" ]]; then
     if [[ -f ./Runfile ]]; then _run_tasks; else _run_init; fi
   elif [[ "$1" == "-h" ]]; then
@@ -49,7 +49,7 @@ _run_completion_install() {
     ! which compinit >/dev/null && autoload -Uz compinit && compinit
     ! which bashcompinit >/dev/null && autoload -Uz bashcompinit && bashcompinit
   fi
-  complete -F _run_completion_complete run Runfile
+  complete -F _run_completion_complete run.sh Runfile
 }
 _run_file_append_if() {
   local rc=$1 cmd=$2
