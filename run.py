@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env extern=1 python3
 import sys
 import os
 import subprocess
@@ -152,7 +152,7 @@ def run_main(filename):
 
 def _main():
     file = __file__
-    if not sys.argv[0].endswith('.py'):
+    if os.getenv('extern') == '1':
         if os.getenv('gen_sh') == '1': return generate_script('Runfile.sh')
         file = 'Runfile.py'
         if len(sys.argv) < 2 and not os.path.isfile(file):
