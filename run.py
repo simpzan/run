@@ -141,4 +141,16 @@ def run_main(filename):
     code = _run_task_file(filename, fn, args)
     sys.exit(code)
 
-if __name__ == "__main__": run_main(__file__)
+def _main():
+    file = './Runfile.py'
+    if len(sys.argv) < 2:
+        if os.path.isfile(file): return list_functions(file)
+        else: return generate_script()
+    _, fn, *args = sys.argv
+    if fn[0] == '.':
+        fn = fn[1:]
+        file = __file__
+    code = _run_task_file(file, fn, args)
+    sys.exit(code)
+
+if __name__ == "__main__": _main()
