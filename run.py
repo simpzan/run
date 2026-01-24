@@ -53,7 +53,7 @@ def _get_functions(module):
     items = vars(module).items()
     return [fn for fn, obj in items if is_public(fn, obj)]
 
-def list_functions(filename='Runfile.py', prefix=''):
+def list_functions(filename, prefix=''):
     module = _load_module(filename)
     for fn in _get_functions(module):
         if fn.startswith(prefix): print(fn)
@@ -80,8 +80,7 @@ def hello():
     sh("uname -a")
 if __name__ == "__main__": run_main(__file__)
 '''
-def generate_script():
-    file = 'Runfile.py'
+def generate_script(file):
     _write_text_file(_template_Runfile_py.lstrip(), file)
     os.chmod(file, 0o755)
     print(f'{file} created!')
@@ -137,10 +136,10 @@ def run_main(filename):
     sys.exit(code)
 
 def _main():
-    file = './Runfile.py'
+    file = 'Runfile.py'
     if len(sys.argv) < 2:
         if os.path.isfile(file): return list_functions(file)
-        else: return generate_script()
+        else: return generate_script(file)
     _, fn, *args = sys.argv
     if fn[0] == '.':
         fn = fn[1:]
