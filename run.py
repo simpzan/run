@@ -93,8 +93,9 @@ main_() {
 }
 main_ $@
 '''
-def generate_script(file):
-    code = _template_Runfile_sh if file.endswith('.sh') else _template_Runfile_py
+def generate_script(ext):
+    code = _template_Runfile_sh if ext == '.sh' else _template_Runfile_py
+    file = f'Runfile.{ext}'
     _write_text_file(code.lstrip(), file)
     os.chmod(file, 0o755)
     print(f'{file} created!')
@@ -153,10 +154,9 @@ def run_main(filename):
 def _main():
     file = __file__
     if os.getenv('extern') == '1':
-        if os.getenv('gen_sh') == '1': return generate_script('Runfile.sh')
         file = 'Runfile.py'
         if len(sys.argv) < 2 and not os.path.isfile(file):
-            return generate_script(file)
+            return generate_script('py')
     run_main(file)
 
 if __name__ == "__main__": _main()
