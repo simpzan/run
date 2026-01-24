@@ -153,6 +153,7 @@ def run_main(filename):
 def _main():
     file = __file__
     if not sys.argv[0].endswith('.py'):
+        if os.getenv('gen_sh') == '1': return generate_script('Runfile.sh')
         file = 'Runfile.py'
         if len(sys.argv) < 2 and not os.path.isfile(file):
             return generate_script(file)
