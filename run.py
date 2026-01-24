@@ -93,7 +93,8 @@ def install():
 sudo cp {current_file_path} {run_file};
 sudo chmod a+x {run_file};
 sudo ln -sf {run_file} {link_file}
-echo 'complete -C "{link_file} .complete" run.py Runfile.py' | tee -a ~/.bashrc;
+sudo ln -sf {run_file} {link_file[:-3]}
+echo 'complete -C "{link_file} .complete" run run.py Runfile.py' | tee -a ~/.bashrc;
 echo '`run.py` installed! restart shell session to use it.'
     ''')
 
