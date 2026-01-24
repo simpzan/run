@@ -54,6 +54,7 @@ def _get_functions(module):
     return [fn for fn, obj in items if is_public(fn, obj)]
 
 def list_functions(filename, prefix=''):
+    if not os.path.isfile(filename): return
     module = _load_module(filename)
     for fn in _get_functions(module):
         if fn.startswith(prefix): print(fn)
