@@ -84,7 +84,7 @@ if __name__ == "__main__": run_main(__file__)
 _template_Runfile_sh = '''
 #!/bin/bash
 set -euo pipefail
-help() { echo "run, the minimalist's task runner - https://github.com/simpzan/run"; }
+hello() { uname -a; }
 main_() {
     if [[ -z "$@" ]]; then compgen -A function | grep -v "_$";
     elif declare -F "$1" >/dev/null; then "$@";
@@ -93,10 +93,8 @@ main_() {
 }
 main_ $@
 '''
-def generate_script():
-    ext = os.getenv('ext') or 'py'
-    file = f'Runfile.{ext}'
-    code = _template_Runfile_sh if ext == 'sh' else _template_Runfile_py
+def generate_script(file):
+    code = _template_Runfile_sh if file.endswith('.sh') else _template_Runfile_py
     _write_text_file(code.lstrip(), file)
     os.chmod(file, 0o755)
     print(f'{file} created!')
@@ -157,7 +155,7 @@ def _main():
     if not sys.argv[0].endswith('.py'):
         file = 'Runfile.py'
         if len(sys.argv) < 2 and not os.path.isfile(file):
-            return generate_script()
+            return generate_script(file)
     run_main(file)
 
 if __name__ == "__main__": _main()
