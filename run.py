@@ -94,7 +94,7 @@ sudo cp {current_file_path} {run_file};
 sudo chmod a+x {run_file};
 sudo ln -sf {run_file} {link_file}
 sudo ln -sf {run_file} {link_file[:-3]}
-echo 'complete -C "{link_file} .complete" run run.py Runfile.py' | tee -a ~/.bashrc;
+echo 'complete -C "{link_file} complete" run run.py Runfile.py' | tee -a ~/.bashrc;
 echo '`run.py` installed! restart shell session to use it.'
     ''')
 
@@ -137,15 +137,11 @@ def run_main(filename):
     sys.exit(code)
 
 def _main():
-    file = 'Runfile.py'
-    if len(sys.argv) < 2:
-        if os.path.isfile(file): return list_functions(file)
-        else: return generate_script(file)
-    _, fn, *args = sys.argv
-    if fn[0] == '.':
-        fn = fn[1:]
-        file = __file__
-    code = _run_task_file(file, fn, args)
-    sys.exit(code)
+    file = __file__
+    if not sys.argv[0].endswith('.py'):
+        file = 'Runfile.py'
+        if len(sys.argv) < 2 and not os.path.isfile(file):
+            return generate_script(file)
+    run_main(file)
 
 if __name__ == "__main__": _main()
