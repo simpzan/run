@@ -1,4 +1,4 @@
-#!/usr/bin/env extern=1 python3
+#!/usr/bin/env -S extern=1 python3
 import sys
 import os
 import subprocess
