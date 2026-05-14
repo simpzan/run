@@ -311,7 +311,8 @@ def _change_name_to_ip(filepath):
 def scp(src, dst):
     src = _change_name_to_ip(src)
     dst = _change_name_to_ip(dst)
-    _sh(f'sshpass -p amd1234 scp -r {src} {dst}')
+    options = '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -q'
+    _sh(f'sshpass -p amd1234 scp {options} -r {src} {dst}')
 cp = scp
 
 def xml(vm, edit=''):
