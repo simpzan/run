@@ -343,7 +343,7 @@ def _complete(*_):
     _print_list(backend.get_vm_list(state), word1)
 def install():
     has_apt = _sh('apt --version >/dev/null 2>&1').returncode == 0
-    if has_apt: deps = 'apt install -y guestfs-tools sshpass'
+    if has_apt: deps = 'apt install -y guestfs-tools sshpass libvirt-dev'
     else: deps = 'yum install -y libguestfs-tools sshpass libvirt-devel'
     _sh(f'''set -x;
         sudo usermod -a -G libvirt $USER
